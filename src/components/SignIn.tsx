@@ -9,7 +9,7 @@ type SignInProps = {
 
 const SignIn = ({ children, signUp }: SignInProps) => {
   return (
-    <div className="container mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
+    <div className="container mx-auto flex w-full flex-col justify-center space-y-6 ">
       <div className="flex flex-col space-y-2 text-center">
         <LucideSkull className="mx-auto h-8 w-8 text-primary" />
 
@@ -24,7 +24,7 @@ const SignIn = ({ children, signUp }: SignInProps) => {
 
       {!signUp ? (
         <p className="px-8 text-center text-sm text-muted-foreground">
-          New to Breaddit?{" "}
+          New 🧑‍🎨 Here?{" "}
           <Link
             href="/sign-up"
             className="hover:text-primary text-sm underline underline-offset-4"

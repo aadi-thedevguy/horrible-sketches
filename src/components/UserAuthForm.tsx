@@ -26,7 +26,7 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const formSchema = z.object({
   email: z.string().trim().email(),
-  name: z.string().min(3),
+  name: z.string().min(3).trim(),
 });
 
 const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
@@ -47,12 +47,12 @@ const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // first check if the username exists or not
 
-    const { data, error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       email: values.email,
       options: {
         emailRedirectTo: `${location.origin}/auth/callback`,
         data: {
-          username: values.name,
+          fullName: values.name,
         },
       },
     });

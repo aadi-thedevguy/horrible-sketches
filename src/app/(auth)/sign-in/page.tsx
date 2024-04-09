@@ -1,31 +1,34 @@
 import SignIn from "@/components/SignIn";
 import UserAuthForm from "@/components/UserAuthForm";
 import { buttonVariants } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { FC } from "react";
 
 const page: FC = async () => {
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.getUser();
+
+  if (!error && data.user) {
+    redirect("/dashboard");
+  }
 
   return (
-    <div className="absolute inset-0">
-      <div className="h-full max-w-2xl mx-auto flex flex-col items-center justify-center gap-20">
-        <Link
-          href="/"
-          className={cn(
-            buttonVariants({ variant: "ghost" }),
-            "self-start -mt-20"
-          )}
-        >
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          Home
-        </Link>
+    <div className="h-full max-w-2xl mx-auto">
+      <Link
+        href="/"
+        className={cn(buttonVariants({ variant: "ghost" }), "text-left")}
+      >
+        <ChevronLeft className="mr-2 h-4 w-4" />
+        Home
+      </Link>
 
-        <SignIn>
-          <UserAuthForm />
-        </SignIn>
-      </div>
+      <SignIn>
+        <UserAuthForm />
+      </SignIn>
     </div>
   );
 };

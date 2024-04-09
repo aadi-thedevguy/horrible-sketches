@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import React from "react";
-import { createClient } from "@/lib/supabase/server";
-import { Icons } from "./Icons";
+import { toast } from "./ui/use-toast";
+import { genericMessages } from "@/constants";
 import { Button, buttonVariants } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -12,62 +16,100 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn, createAvatar } from "@/lib/utils";
+import { supabase } from "@/lib/supabase/client";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
-const Navbar = async ({ children }: { children: React.ReactNode }) => {
-  const supabase = createClient();
+const Navbar = () => {
+  const {
+    data,
+    isError,
+  } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => await supabase.auth.getUser(),
+  });
 
-  const { data } = await supabase.auth.getUser();
-  // if (error || !data?.user) {
-  //   redirect('/')
-  // }
+  const router = useRouter();
 
-  function createAvatar(fullName: string) {
-    if (fullName.length <= 0) return "US";
-    const nameArray = fullName.split(" ");
-    const firstNameInitial = nameArray[0].charAt(0);
-    const lastNameInitial = nameArray[1].charAt(0);
-    const avatar = firstNameInitial + lastNameInitial;
-    return avatar;
-  }
+  const { mutate } = useMutation({
+    mutationFn: async () => await supabase.auth.signOut(),
+    onSuccess: () => router.push("/sign-in"),
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || genericMessages.SIGNOUT_FAILED,
+        variant: "destructive",
+      });
+      return;
+    },
+  });
 
-  let avatar = "";
-
-  if (data.user) {
-    avatar = createAvatar(data.user?.user_metadata?.fullName || "");
-  }
+  const user = data?.data.user;
+  let avatar = createAvatar(
+    user?.user_metadata?.username || user?.user_metadata.full_name
+  );
 
   return (
-    <div className="fixed top-0 inset-x-0 h-fit bg-zinc-100 border-b border-zinc-300 z-[10] py-2">
+    <div className="h-fit bg-zinc-100 border-b border-zinc-300 py-2">
       <div className="container max-w-7xl h-full mx-auto flex items-center justify-between gap-2">
         {/* logo */}
-        <Link href="/" className="flex gap-2 items-center">
-          <Icons.logo className="h-8 w-8 sm:h-6 sm:w-6" />
-          <p className="hidden text-zinc-700 text-sm font-medium md:block">
-            ☠️👻
-          </p>
+        <Link
+          href="/"
+          className={cn(
+            buttonVariants({ variant: "link" }),
+            "flex items-center"
+          )}
+        >
+          <Image
+            width={32}
+            height={32}
+            alt="logo"
+            className="h-8 w-8 object-center rounded-md"
+            src="/icon-dark.svg"
+          />
+          <span className="hidden md:block font-semibold text-lg text-primary ml-1 ">
+            Horrible Sketches
+          </span>
+          {/* <Icons.logo className="h-8 w-8" /> */}
         </Link>
 
         {/* actions */}
-        {data.user ? (
+        {!isError && user ? (
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Avatar>
-                <AvatarImage src={data.user?.user_metadata?.avatar_url ?? ""} />
-                <AvatarFallback>{avatar}</AvatarFallback>
+                <AvatarImage
+                  src={
+                    user?.user_metadata?.avatar_url ??
+                    // "https://api.dicebear.com/8.x/micah/svg?seed=Bear&backgroundColor=6100bd"
+                    "https://api.dicebear.com/8.x/micah/svg?seed=Bear"
+                  }
+                />
+
+                <AvatarFallback className="text-white bg-secondary">
+                  {avatar}
+                </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
+
             <DropdownMenuContent>
-              <DropdownMenuLabel className="text-primary-foreground">My Account</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-primary-foreground">
+                My Account
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
+
               <DropdownMenuItem>
-                {" "}
-                <Link href="/dashboard">
-                  <Button variant="link">My Dashboard</Button>
+                <Link
+                  href="/dashboard"
+                  className={buttonVariants({ variant: "link" })}
+                >
+                  Dashboard
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                {" "}
-                {children}
+                <Button variant="link" onClick={() => mutate()}>
+                  Sign Out
+                </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -1,6 +1,6 @@
 {
-  "id": "cc12b4e2-3104-4570-bf77-ef9cc9300f9e",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "baa08b16-a3ce-4b15-a40d-4bc9116db842",
+  "prevId": "cc12b4e2-3104-4570-bf77-ef9cc9300f9e",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -17,6 +17,12 @@
         },
         "email": {
           "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "username": {
+          "name": "username",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -41,6 +47,13 @@
           "name": "email_idx",
           "columns": [
             "email"
+          ],
+          "isUnique": false
+        },
+        "name_idx": {
+          "name": "name_idx",
+          "columns": [
+            "username"
           ],
           "isUnique": false
         }

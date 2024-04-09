@@ -1,26 +1,26 @@
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   text,
   timestamp,
-  integer,
   uuid,
   doublePrecision,
   index,
-  serial,
 } from "drizzle-orm/pg-core";
 
-export const user = pgTable(
-  "users",
+export const profile = pgTable(
+  "profiles",
   {
-    id: serial("id").primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull().unique(),
+    username: text("username").default(""),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    fullName: text("fullName").notNull().unique(),
-    // avatarUrl: text("avatar_url"),
   },
   (table) => {
     return {
-      nameIdx: index("name_idx").on(table.fullName),
+      emailIdx: index("email_idx").on(table.email),
+      nameIdx: index("name_idx").on(table.username),
     };
   }
 );
@@ -30,7 +30,20 @@ export const sketch = pgTable("sketches", {
   url: text("url").notNull(),
   size: doublePrecision("size"),
   filename: text("filename").notNull(),
-  authorId: integer("author_id").references(() => user.id),
+  authorId: uuid("author_id").notNull().references(() => profile.id),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// Relations
+
+export const profilesRelations = relations(profile, ({ many }) => ({
+  sketches: many(sketch),
+}));
+
+export const sketchRelations = relations(sketch, ({ one }) => ({
+  author: one(profile, {
+    fields: [sketch.authorId],
+    references: [profile.id],
+  }),
+}));

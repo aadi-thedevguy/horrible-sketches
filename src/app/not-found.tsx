@@ -1,12 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
+import { HomeIcon } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function NotFound() {
   return (
     <main className="min-h-[70vh] mt-6 flex flex-col items-center justify-items-center gap-7">
       <Image
         src={"/images/error-404.png"}
-        alt="verification-failed"
+        alt="error street sign"
         height={250}
         width={250}
         className="mt-10"
@@ -16,10 +19,14 @@ export default function NotFound() {
         Sorry, we could not find the page you were looking for.
       </p>
       <Link
-        href="/"
-        className="inline-block border border-secondary hover:bg-secondary/70 hover:text-white transition-colors duration-500 text-textPrimary rounded-3xl px-4 py-2 mt-8"
+        href={"/sign-in"}
+        className={cn(
+          buttonVariants({ variant: "secondary" }),
+          "flex items-center gap-2"
+        )}
       >
-        Back To Home
+        <span>Go Back To</span>
+        <HomeIcon className="w-4 h-4" />
       </Link>
     </main>
   );

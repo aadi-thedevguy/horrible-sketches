@@ -22,11 +22,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
+  signUp?: boolean;
+}
 
 const formSchema = z.object({
-  email: z.string().trim().email(),
-  name: z.string().min(3).trim(),
+  email: z.string().trim().email().max(50),
+  name: z.string().trim().min(3).max(30),
 });
 
 const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
@@ -52,14 +54,12 @@ const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
       options: {
         emailRedirectTo: `${location.origin}/auth/callback`,
         data: {
-          fullName: values.name,
+          username: values.name,
         },
       },
     });
-    form.reset()
 
     if (error) {
-
       toast({
         title: "Error",
         description: error.message,
@@ -67,6 +67,8 @@ const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
       });
       return;
     }
+    form.reset();
+
     return toast({
       title: "Success",
       description: genericMessages.SIGN_IN_MAIL_SENT,
@@ -81,7 +83,7 @@ const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${location.origin}/auth/callback`,
+          redirectTo: `${location.origin}/auth/callback`
         },
       });
     } catch (error) {
@@ -99,19 +101,21 @@ const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
     <div className={cn("flex justify-center", className)} {...props}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Full Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="John Doe" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {props.signUp && (
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Your Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="John Doe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
           <FormField
             control={form.control}
             name="email"

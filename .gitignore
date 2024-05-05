@@ -27,10 +27,12 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+# .env
 .env*.local
-
 # vercel
 .vercel
+bun.lockb
+pnpm-lock.yaml
 
 # typescript
 *.tsbuildinfo

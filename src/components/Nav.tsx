@@ -7,6 +7,7 @@ import React from "react";
 import { toast } from "./ui/use-toast";
 import { genericMessages } from "@/constants";
 import { Button, buttonVariants } from "./ui/button";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -18,13 +19,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn, createAvatar } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
 
 const Navbar = () => {
-  const {
-    data,
-    isError,
-  } = useQuery({
+  const client = new QueryClient();
+
+  const { data, isError } = useQuery({
     queryKey: ["user"],
     queryFn: async () => await supabase.auth.getUser(),
   });
@@ -33,7 +33,10 @@ const Navbar = () => {
 
   const { mutate } = useMutation({
     mutationFn: async () => await supabase.auth.signOut(),
-    onSuccess: () => router.push("/sign-in"),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: ["user"] });
+      router.push("/sign-in");
+    },
     onError: (error) => {
       toast({
         title: "Error",
@@ -45,6 +48,7 @@ const Navbar = () => {
   });
 
   const user = data?.data.user;
+
   let avatar = createAvatar(
     user?.user_metadata?.username || user?.user_metadata.full_name
   );

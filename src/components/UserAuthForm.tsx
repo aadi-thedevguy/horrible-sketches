@@ -21,22 +21,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authformSchema } from "@/lib/validations";
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
-  signUp?: boolean;
-}
-
-const formSchema = z.object({
-  email: z.string().trim().email().max(50),
-  name: z.string().trim().min(3).max(30),
-});
+interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof authformSchema>>({
+    resolver: zodResolver(authformSchema),
     defaultValues: {
       email: "",
       name: "",
@@ -46,7 +40,7 @@ const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
     formState: { isSubmitting },
   } = form;
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof authformSchema>) {
     // first check if the username exists or not
 
     const { error } = await supabase.auth.signInWithOtp({
@@ -54,7 +48,7 @@ const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
       options: {
         emailRedirectTo: `${location.origin}/auth/callback`,
         data: {
-          username: values.name,
+          username: values.name ? values.name : "",
         },
       },
     });
@@ -83,7 +77,7 @@ const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${location.origin}/auth/callback`
+          redirectTo: `${location.origin}/auth/callback`,
         },
       });
     } catch (error) {
@@ -101,21 +95,21 @@ const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
     <div className={cn("flex justify-center", className)} {...props}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {props.signUp && (
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Your Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+          {/* {props.signUp && ( */}
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Your Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="John Doe" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* )} */}
           <FormField
             control={form.control}
             name="email"
@@ -131,7 +125,7 @@ const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
           />
           <Button
             type="submit"
-            className="w-full text-center disabled:bg-opacity-75"
+            className="w-full text-center disabled:cursor-not-allowed disabled:bg-opacity-75"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Submitting" : "Submit"}{" "}

@@ -25,7 +25,7 @@ const page = async () => {
       </Link>
 
       <SignIn signUp>
-        <UserAuthForm signUp />
+        <UserAuthForm />
       </SignIn>
     </div>
   );

@@ -69,7 +69,7 @@ const Navbar = () => {
             height={32}
             alt="logo"
             className="h-8 w-8 object-center rounded-md"
-            src="/icon-dark.svg"
+            src="/logo.png"
           />
           <span className="hidden md:block font-semibold text-lg text-primary ml-1 ">
             Horrible Sketches

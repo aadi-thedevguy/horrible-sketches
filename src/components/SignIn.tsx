@@ -1,4 +1,3 @@
-import { LucideSkull } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import {
@@ -9,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
+import Image from "next/image";
 
 type SignInProps = {
   children: React.ReactNode;
@@ -18,11 +18,17 @@ type SignInProps = {
 const SignIn = ({ children, signUp }: SignInProps) => {
   return (
     <>
-      <Card className="mx-auto max-w-md">
+      <Card className="mx-auto w-full max-w-xs">
         <CardHeader>
           <CardTitle>
             <div className="flex flex-col space-y-2 text-center">
-              <LucideSkull className="mx-auto h-8 w-8 text-primary" />
+              <Image
+                src="/logo.png"
+                width={90}
+                height={90}
+                alt="logo"
+                className="mx-auto text-primary"
+              />
 
               <h1 className="text-2xl font-semibold tracking-tight">
                 {signUp ? "Welcome Bad Artist" : "Welcome back"}
@@ -46,8 +52,8 @@ const SignIn = ({ children, signUp }: SignInProps) => {
               </Link>
             </p>
           ) : (
-            <p className="px-8 text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
+            <p className="px-8 text-left text-sm text-muted-foreground">
+              Already have an account? <br />
               <Link
                 href="/sign-in"
                 className="hover:text-primary text-sm underline underline-offset-4"

@@ -8,13 +8,13 @@ export default function Failed() {
     <main className="max-w-3xl mx-auto bg-white mt-10">
       <header className="py-8 flex justify-center w-full">
         <Image
-          width={180}
-          height={32}
+          width={200}
+          height={180}
           src="https://firebasestorage.googleapis.com/v0/b/portfolio-52b82.appspot.com/o/Horrible%20Sketches.png?alt=media"
           alt="logo"
         />
       </header>
-      <section className="h-48 bg-red-600 rounded-md w-full text-white flex items-center justify-center flex-col gap-5 mb-4">
+      <section className="h-48 bg-red-400 rounded-md w-full text-white flex items-center justify-center flex-col gap-5 mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-[1px] bg-white"></div>
           <EmailIcon />

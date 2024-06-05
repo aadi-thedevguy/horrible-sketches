@@ -4,6 +4,8 @@ import "./globals.css";
 import Navbar from "@/components/Nav";
 import { Toaster } from "@/components/ui/toaster";
 import Providers from "@/components/Providers";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,6 +22,8 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <SpeedInsights />
+        <Analytics />
         <Providers>
           <Toaster />
           <Navbar />

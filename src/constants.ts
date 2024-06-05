@@ -5,6 +5,8 @@ export const genericMessages = {
   SIGN_IN_MAIL_SENT: "Email sent successfully, Please Check Your Inbox",
   SIGNOUT_FAILED: "Failed to Sign Out, Try Again Later",
   CANNOT_FETCH_USER: "Unable to fetch user info",
+  ACCOUNT_ALREADY_EXISTS: "This email is already registered",
+  USER_NOT_FOUND: "User not found, Please Sign Up",
 };
 
 export const DEFAULTS = {

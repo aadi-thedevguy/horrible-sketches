@@ -1,8 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import * as React from "react";
-import { FC } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { RefreshCcw } from "lucide-react";
@@ -21,53 +19,36 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authformSchema } from "@/lib/validations";
+import { signinSchema } from "@/lib/validations";
+import { signIn } from "@/server/actions/user";
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
+const SignInForm = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const form = useForm<z.infer<typeof authformSchema>>({
-    resolver: zodResolver(authformSchema),
+  const form = useForm<z.infer<typeof signinSchema>>({
+    resolver: zodResolver(signinSchema),
     defaultValues: {
       email: "",
-      name: "",
     },
   });
   const {
     formState: { isSubmitting },
   } = form;
 
-  async function onSubmit(values: z.infer<typeof authformSchema>) {
-    // first check if the username exists or not
+  async function onSubmit(values: z.infer<typeof signinSchema>) {
+    const formData = new FormData();
+    formData.append("email", values.email);
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email: values.email,
-      options: {
-        emailRedirectTo: `${location.origin}/auth/callback`,
-        data: {
-          username: values.name ? values.name : "",
-        },
-      },
+    const { message, type } = await signIn(formData);
+
+    toast({
+      title: type.toUpperCase(),
+      description: message,
+      variant: type === "error" ? "destructive" : null,
+      className: type !== "error" ? "bg-green-300" : undefined,
     });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-      return;
-    }
     form.reset();
-
-    return toast({
-      title: "Success",
-      description: genericMessages.SIGN_IN_MAIL_SENT,
-      className: "bg-green-300",
-    });
   }
 
   const loginWithGoogle = async () => {
@@ -92,24 +73,9 @@ const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
   };
 
   return (
-    <div className={cn("flex justify-center", className)} {...props}>
+    <div className="flex justify-center">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* {props.signUp && ( */}
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Your Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="John Doe" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* )} */}
           <FormField
             control={form.control}
             name="email"
@@ -154,4 +120,4 @@ const UserAuthForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
   );
 };
 
-export default UserAuthForm;
+export default SignInForm;

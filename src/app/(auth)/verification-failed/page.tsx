@@ -14,7 +14,7 @@ export default function Failed() {
           alt="logo"
         />
       </header>
-      <section className="h-48 bg-red-400 rounded-md w-full text-white flex items-center justify-center flex-col gap-5 mb-4">
+      <section className="h-48 bg-red-500 rounded-md w-full text-white flex items-center justify-center flex-col gap-5 mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-[1px] bg-white"></div>
           <EmailIcon />

@@ -1,22 +1,32 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { profile } from "@/lib/db/schema";
+import { EmailOtpType } from "@supabase/supabase-js";
 
-export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get("code");
-  // if "next" is in param, use it as the redirect URL
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const token_hash = searchParams.get("token_hash");
+  const type = searchParams.get("type") as EmailOtpType | null;
   const next = searchParams.get("next") ?? "/";
 
-  if (!code) {
-    return NextResponse.redirect(`${origin}/verification-failed`);
-  }
-  const supabase = createClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const redirectTo = request.nextUrl.clone();
+  redirectTo.pathname = next;
+  redirectTo.searchParams.delete("token_hash");
+  redirectTo.searchParams.delete("type");
 
+  if (!token_hash || !type) {
+    return NextResponse.redirect(redirectTo);
+  }
+
+  const supabase = createClient();
+  const { error } = await supabase.auth.verifyOtp({
+    type,
+    token_hash,
+  });
   if (error) {
-    return NextResponse.redirect(`${origin}/verification-failed`);
+    redirectTo.pathname = "/verification-failed";
+    return NextResponse.redirect(redirectTo);
   }
   const {
     data: { user },
@@ -33,12 +43,16 @@ export async function GET(request: Request) {
             user.user_metadata.username || user.user_metadata.full_name || "",
         })
         .onConflictDoNothing({ target: profile.id });
-      return NextResponse.redirect(`${origin}${next}`);
+
+      redirectTo.searchParams.delete("next");
+      return NextResponse.redirect(redirectTo);
     }
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);
-      return NextResponse.redirect(`${origin}/verification-failed`);
+      // return the user to an error page with some instructions
+      redirectTo.pathname = "/verification-failed";
+      return NextResponse.redirect(redirectTo);
     }
   }
 }

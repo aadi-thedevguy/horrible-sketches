@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { HomeIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronLeftSquare, HomeIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -21,12 +21,12 @@ export default function NotFound() {
       <Link
         href={"/sign-in"}
         className={cn(
-          buttonVariants({ variant: "secondary" }),
+          buttonVariants({ variant: "ghost" }),
           "flex items-center gap-2"
         )}
       >
-        <span>Go Back To</span>
-        <HomeIcon className="w-4 h-4" />
+        <ChevronLeftIcon className="w-4 h-4" />
+        <span>Go Back</span>
       </Link>
     </main>
   );

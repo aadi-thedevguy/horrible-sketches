@@ -9,9 +9,14 @@ export const genericMessages = {
   USER_NOT_FOUND: "User not found, Please Sign Up",
 };
 
-export const DEFAULTS = {
+export const constants = {
   BACKGROUND: "#fd8153",
   TEXT: "#0a0a0a",
-  PAGES: 5,
   RESULTS_PER_PAGE: 10,
+  ICON: "/logo.png",
+  THUMBNAIL: "/thumbnail.png",
+  SITE_URL: "https://horrible-sketches.thedevguy.in",
+  SITE_TITLE: "Horrible Sketches",
+  SITE_DESCRIPTION:
+    "Show your friends that AI can never catch up to your horrible Art skills",
 };

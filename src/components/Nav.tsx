@@ -31,9 +31,9 @@ const Navbar = async () => {
             className="h-8 w-8 object-center rounded-md"
             src="/logo.png"
           />
-          <span className="hidden md:block font-semibold text-lg text-primary ml-1 ">
+          {/* <span className="hidden md:block font-semibold text-lg text-primary ml-1 ">
             Horrible Sketches
-          </span>
+          </span> */}
           {/* <Icons.logo className="h-8 w-8" /> */}
         </Link>
 

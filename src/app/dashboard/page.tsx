@@ -6,14 +6,12 @@ import { redirect } from "next/navigation";
 import React from "react";
 
 async function Dashboard() {
-  
-  const supabase = createClient()
-  // const {data,error} = await supabase.auth.getUser()
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.getUser();
 
-  // if (error || !data.user) {
-  //   redirect("/sign-in")
-  // }
-
+  if (error || !data.user) {
+    redirect("/sign-in");
+  }
 
   return (
     <>

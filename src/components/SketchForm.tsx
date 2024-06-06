@@ -26,7 +26,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { DEFAULTS } from "@/constants";
+import { constants } from "@/constants";
 import { sketchformSchema } from "@/lib/validations";
 import { z } from "zod";
 import Link from "next/link";
@@ -40,7 +40,7 @@ function SketchForm({ user }: { user: User }) {
     defaultValues: {
       title: "",
       canvasBg: "transparent",
-      pencilColor: DEFAULTS.TEXT,
+      pencilColor: constants.TEXT,
       strokeWidth: 5,
       eraserWidth: 5,
     },

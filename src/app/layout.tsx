@@ -6,12 +6,34 @@ import { Toaster } from "@/components/ui/toaster";
 import Providers from "@/components/Providers";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
+import { constants } from "@/constants";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Horrible Sketches",
-  description: "Show how bad you can sketch to your friends",
+  title: constants.SITE_TITLE,
+  description: constants.SITE_DESCRIPTION,
+  openGraph: {
+    title: constants.SITE_TITLE,
+    description: constants.SITE_DESCRIPTION,
+    images: [
+      {
+        url: constants.THUMBNAIL,
+        width: 1920,
+        height: 1080,
+        alt: constants.SITE_TITLE,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: constants.SITE_TITLE,
+    description: constants.SITE_DESCRIPTION,
+    images: [constants.THUMBNAIL],
+    creator: "@thedevguy.in",
+  },
+  icons: constants.ICON,
+  metadataBase: new URL(constants.SITE_URL),
 };
 
 export default async function RootLayout({

@@ -1,20 +1,30 @@
 import { z } from "zod";
 
-export const sketchformSchema = z.object({
-  title: z
+export const validateFile = z.object({
+  filename: z.string().min(5).max(30).includes(".png"),
+  file: z
     .string()
-    .min(5, { message: "Title must be 5 or more characters long" })
-    .max(30, { message: "Title shouldn't exceed 30 characters" }),
+    .min(1, { message: "File is required" })
+    .startsWith("data:image/png;base64,"),
+  // edit: z.boolean().default(false),
+  // id: z.string().min(10).optional(),
+});
+
+export const sketchformSchema = z.object({
+  name: z
+    .string()
+    .min(5, { message: "Sketch Name must be 5 or more characters long" })
+    .max(30, { message: "Sketch Name shouldn't exceed 30 characters" }),
   canvasBg: z
     .string()
+    .includes("#")
     .min(4, { message: "Enter a Valid Hex Color Value" })
-    .max(6, { message: "Enter a Valid Hex Color Value" })
-    .optional(),
+    .max(7, { message: "Enter a Valid Hex Color Value" }),
   pencilColor: z
     .string()
+    .includes("#")
     .min(4, { message: "Enter a Valid Hex Color Value" })
-    .max(6, { message: "Enter a Valid Hex Color Value" })
-    .optional(),
+    .max(7, { message: "Enter a Valid Hex Color Value" }),
 });
 
 export const signupSchema = z.object({

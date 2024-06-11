@@ -4,6 +4,9 @@ import {
   ReactSketchCanvas,
   type ReactSketchCanvasRef,
 } from "react-sketch-canvas";
+import { DBConfig } from "@/lib/utils";
+import { initDB, useIndexedDB } from "react-indexed-db-hook";
+
 import Image from "next/image";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -14,6 +17,7 @@ import {
   TabletSmartphone,
   UserCheck2,
   Paintbrush,
+  RefreshCcw,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
@@ -31,15 +35,20 @@ import { sketchformSchema } from "@/lib/validations";
 import { z } from "zod";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { toast } from "./ui/use-toast";
+import { createSketch } from "@/server/actions/sketch";
+import { title } from "process";
 import { User } from "@supabase/supabase-js";
 
 function SketchForm({ user }: { user: User }) {
+  // initDB(DBConfig);
+  // const { update, add, getByID, getByIndex } = useIndexedDB("sketch-progress");
   const canvasRef = React.useRef<ReactSketchCanvasRef>(null);
   const form = useForm({
     resolver: zodResolver(sketchformSchema),
     defaultValues: {
-      title: "",
-      canvasBg: "transparent",
+      name: "",
+      canvasBg: "#ffffff",
       pencilColor: constants.TEXT,
       strokeWidth: 5,
       eraserWidth: 5,
@@ -47,12 +56,53 @@ function SketchForm({ user }: { user: User }) {
     mode: "onSubmit",
   });
 
+  const { isSubmitting } = form.formState;
   const bg = form.watch("canvasBg");
   const stroke = form.watch("pencilColor");
   const pencil = form.watch("strokeWidth");
   const eraser = form.watch("eraserWidth");
 
-  const onSubmit = (values: z.infer<typeof sketchformSchema>) => {};
+  const onSubmit = async (values: z.infer<typeof sketchformSchema>) => {
+    const file = await canvasRef.current?.exportImage("png");
+    const filename = values.name.replace(/\s/g, "-").toLowerCase() + ".png";
+
+    const formData = new FormData();
+    if (file) formData.append("file", file);
+    formData.append("filename", filename);
+    const { message, type } = await createSketch(formData);
+
+    toast({
+      title: type.charAt(0).toUpperCase() + type.slice(1),
+      description: message,
+      variant: type === "error" ? "destructive" : null,
+      className: type !== "error" ? "bg-green-300" : undefined,
+    });
+    form.reset();
+    canvasRef.current?.resetCanvas();
+  };
+
+  // const saveToIndexDB = async () => {
+  //   // Save the canvas data to IndexedDB when the user leaves the canvas
+  //   const dataURL = canvasRef.current?.exportImage("png");
+  //   const key = user.id + title.split(" ").join("-");
+  //   try {
+  //     const id = await update({ key, value: dataURL }, "sketch-progress");
+  //     console.log("Saved canvas data with id:", id);
+  //   } catch (error) {
+  //     console.log("Failed to save canvas data:", error);
+  //   }
+  // };
+
+  // React.useEffect(() => {
+  //   getByIndex("userId", user?.id)
+  //     .then((data) => {
+  //       console.log(data);
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     });
+  // }, [user?.id, getByIndex]);
+
   return (
     <section className="max-w-xl mx-auto">
       <h1 className="sm:flex hidden gap-2 items-center justify-center mb-8 text-3xl font-semibold ">
@@ -62,12 +112,7 @@ function SketchForm({ user }: { user: User }) {
       {/* For Mobile Screens */}
       <div className="sm:hidden w-full p-8">
         <header className="flex justify-center w-full mb-20">
-          <Image
-            width={180}
-            height={32}
-            src="https://firebasestorage.googleapis.com/v0/b/portfolio-52b82.appspot.com/o/Horrible%20Sketches.png?alt=media"
-            alt="logo"
-          />
+          <Image width={180} height={32} src="/preview.png" alt="logo" />
         </header>
         <h1 className="flex justify-center gap-1 my-4 text-2xl font-semibold ">
           <span>Sorry, Screen is Too small</span>
@@ -98,10 +143,10 @@ function SketchForm({ user }: { user: User }) {
           <div className="grid gap-2">
             <FormField
               control={form.control}
-              name="title"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Sketch Name</FormLabel>
                   <FormControl>
                     <Input placeholder="Fish Bones" {...field} />
                   </FormControl>
@@ -207,6 +252,7 @@ function SketchForm({ user }: { user: User }) {
           </div>
           <div className="flex gap-4">
             <Button
+              type="button"
               className={buttonVariants({ variant: "secondary" })}
               title="Undo"
               onClick={() => canvasRef.current?.undo()}
@@ -214,6 +260,7 @@ function SketchForm({ user }: { user: User }) {
               <Undo2Icon />
             </Button>
             <Button
+              type="button"
               className={buttonVariants({ variant: "secondary" })}
               title="Redo"
               onClick={() => canvasRef.current?.redo()}
@@ -222,6 +269,7 @@ function SketchForm({ user }: { user: User }) {
             </Button>
             <div className="h-[inherit] w-0.5 bg-gray-400/30" />
             <Button
+              type="button"
               className={buttonVariants({ variant: "secondary" })}
               title="Pen"
               onClick={() => canvasRef.current?.eraseMode(false)}
@@ -229,6 +277,7 @@ function SketchForm({ user }: { user: User }) {
               <PenToolIcon />
             </Button>
             <Button
+              type="button"
               className={buttonVariants({ variant: "secondary" })}
               title="Eraser"
               onClick={() => canvasRef.current?.eraseMode(true)}
@@ -238,6 +287,7 @@ function SketchForm({ user }: { user: User }) {
             <div className="h-[inherit] w-0.5 bg-gray-400/30" />
 
             <Button
+              type="button"
               className={buttonVariants({ variant: "secondary" })}
               title="Clear"
               onClick={() => canvasRef.current?.clearCanvas()}
@@ -247,7 +297,7 @@ function SketchForm({ user }: { user: User }) {
           </div>
           <div className="grid gap-2">
             <ReactSketchCanvas
-              className="w-full min-h-72"
+              className="w-full min-h-80 border border-gray-300 rounded-md"
               ref={canvasRef}
               strokeWidth={pencil}
               eraserWidth={eraser}
@@ -255,9 +305,14 @@ function SketchForm({ user }: { user: User }) {
               canvasColor={bg}
             />
           </div>
-          <Button type="submit" className="w-full">
-            Create
-          </Button>
+          <div>
+            <Button type="submit" size="lg" disabled={isSubmitting}>
+              {isSubmitting ? "Creating" : "Create"}{" "}
+              {isSubmitting ? (
+                <RefreshCcw className="animate-spin w-4 h-4 ml-2" />
+              ) : null}
+            </Button>
+          </div>
         </form>
       </Form>
     </section>

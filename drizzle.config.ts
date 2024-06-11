@@ -1,8 +1,9 @@
 import type { Config } from "drizzle-kit";
-import "dotenv/config";
+import { config } from "dotenv";
+config();
 
 if (!process.env.DATABASE_URL) {
-  console.log('🔴 Cannot find database url');
+  console.log("🔴 Cannot find database url");
 }
 
 export default {
@@ -10,6 +11,6 @@ export default {
   driver: "pg",
   out: "./drizzle",
   dbCredentials: {
-    connectionString : process.env.DATABASE_URL!
+    connectionString: process.env.DATABASE_URL!,
   },
 } satisfies Config;

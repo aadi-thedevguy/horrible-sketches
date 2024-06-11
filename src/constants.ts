@@ -7,6 +7,14 @@ export const genericMessages = {
   CANNOT_FETCH_USER: "Unable to fetch user info",
   ACCOUNT_ALREADY_EXISTS: "This email is already registered",
   USER_NOT_FOUND: "User not found, Please Sign Up",
+  SKETCH_ALREADY_EXISTS: "A Sketch with the same title already exists",
+  CREATE_SKETCH_SUCCESS: "Your Sketch has been created successfully",
+  CREATE_SKETCH_FAILED:
+    "Sorry, We are unable to Create your Sketch, Try Again Later !",
+  DELETE_SKETCH_SUCCESS: "Your Sketch has been deleted successfully",
+  DELETE_SKETCH_FAILED:
+    "Sorry, We are unable to Delete your Sketch, Try Again Later !",
+  NO_USER_FOUND: "You must be logged in to perform this action",
 };
 
 export const constants = {

@@ -7,12 +7,7 @@ export default function Failed() {
   return (
     <main className="max-w-3xl mx-auto bg-white mt-10">
       <header className="py-8 flex justify-center w-full">
-        <Image
-          width={200}
-          height={180}
-          src="https://firebasestorage.googleapis.com/v0/b/portfolio-52b82.appspot.com/o/Horrible%20Sketches.png?alt=media"
-          alt="logo"
-        />
+        <Image width={200} height={180} src="/preview.png" alt="logo" />
       </header>
       <section className="h-48 bg-red-500 rounded-md w-full text-white flex items-center justify-center flex-col gap-5 mb-4">
         <div className="flex items-center gap-3">

@@ -4,7 +4,7 @@ import {
   ReactSketchCanvas,
   type ReactSketchCanvasRef,
 } from "react-sketch-canvas";
-import { DBConfig } from "@/lib/utils";
+// import { DBConfig } from "@/lib/utils";
 import { initDB, useIndexedDB } from "react-indexed-db-hook";
 
 import Image from "next/image";

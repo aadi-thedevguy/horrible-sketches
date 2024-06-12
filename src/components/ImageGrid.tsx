@@ -2,7 +2,16 @@ import React from "react";
 import Image from "next/image";
 import type { sketch } from "@/lib/db/schema";
 
-async function ImageGrid({ items }: { items: (typeof sketch)[] }) {
+type SketchProps = {
+  filename: string;
+  id: string;
+  url: string;
+  updatedAt: Date;
+  createdAt: Date;
+  authorId: string;
+};
+
+async function ImageGrid({ items }: { items: SketchProps[] }) {
   return (
     // src={`https://picsum.photos/id/${i + 11}/2500/1667.jpg`}
     // <section className="p-4 gap-5 sm:columns-2 sm:gap-8 md:columns-3 [&>article:not(:first-child)]:my-4">
@@ -12,7 +21,6 @@ async function ImageGrid({ items }: { items: (typeof sketch)[] }) {
           <Image
             width={300}
             height={300}
-            // @ts-ignore
             src={i.url}
             className={"w-full h-full object-cover rounded-lg shadow-lg"}
             alt="picture"

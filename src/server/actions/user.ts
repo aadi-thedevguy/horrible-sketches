@@ -36,7 +36,7 @@ export async function signUp(formData: FormData) {
   const { error } = await supabase.auth.signInWithOtp({
     email: email,
     options: {
-      shouldCreateUser: false,
+      // shouldCreateUser: false,
       emailRedirectTo: `${process.env.SERVER_URL}/auth/callback`,
       data: {
         username: name,
@@ -69,35 +69,49 @@ export async function signIn(formData: FormData) {
   }
   const { email } = parsed.data;
 
-  // first check if the username exists or not
-  const result = await db
-    .select()
-    .from(profile)
-    .where(eq(profile.email, email));
+  try {
+    // first check if the username exists or not
+    const result = await db
+      .select()
+      .from(profile)
+      .where(eq(profile.email, email));
 
-  if (result.length <= 0) {
+    if (result.length <= 0) {
+      return {
+        type: "error",
+        message: genericMessages.USER_NOT_FOUND,
+      };
+    }
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email,
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: `${process.env.SERVER_URL}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      return {
+        type: "error",
+        message: error.message,
+      };
+    }
+
+    return {
+      type: "success",
+      message: genericMessages.SIGN_IN_MAIL_SENT,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        type: "error",
+        message: error.message,
+      };
+    }
     return {
       type: "error",
-      message: genericMessages.USER_NOT_FOUND,
+      message: genericMessages.SIGN_IN_FAILED,
     };
   }
-
-  const { error } = await supabase.auth.signInWithOtp({
-    email: email,
-    options: {
-      emailRedirectTo: `${process.env.SERVER_URL}/auth/callback`,
-    },
-  });
-
-  if (error) {
-    return {
-      type: "error",
-      message: error.message,
-    };
-  }
-
-  return {
-    type: "success",
-    message: genericMessages.SIGN_IN_MAIL_SENT,
-  };
 }

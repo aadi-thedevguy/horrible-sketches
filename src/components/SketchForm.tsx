@@ -4,11 +4,9 @@ import {
   ReactSketchCanvas,
   type ReactSketchCanvasRef,
 } from "react-sketch-canvas";
-// import { DBConfig } from "@/lib/utils";
-import { initDB, useIndexedDB } from "react-indexed-db-hook";
-
 import Image from "next/image";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import {
   Undo2Icon,
   Redo2Icon,
@@ -37,12 +35,10 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { toast } from "./ui/use-toast";
 import { createSketch } from "@/server/actions/sketch";
-import { title } from "process";
 import { User } from "@supabase/supabase-js";
 
 function SketchForm({ user }: { user: User }) {
-  // initDB(DBConfig);
-  // const { update, add, getByID, getByIndex } = useIndexedDB("sketch-progress");
+  const router = useRouter();
   const canvasRef = React.useRef<ReactSketchCanvasRef>(null);
   const form = useForm({
     resolver: zodResolver(sketchformSchema),
@@ -57,18 +53,31 @@ function SketchForm({ user }: { user: User }) {
   });
 
   const { isSubmitting } = form.formState;
+  const name = form.watch("name");
   const bg = form.watch("canvasBg");
   const stroke = form.watch("pencilColor");
   const pencil = form.watch("strokeWidth");
   const eraser = form.watch("eraserWidth");
 
+  React.useEffect(() => {
+    if (user.email && window.localStorage) {
+      const data = localStorage.getItem(user.email);
+      if (data) {
+        const parsed = JSON.parse(data);
+        canvasRef.current?.loadPaths(parsed.canvas);
+        form.setValue("name", parsed.name);
+      }
+    }
+  }, [user.email]);
+
   const onSubmit = async (values: z.infer<typeof sketchformSchema>) => {
     const file = await canvasRef.current?.exportImage("png");
-    const filename = values.name.replace(/\s/g, "-").toLowerCase() + ".png";
+    const filename = values.name.replace(/\s/g, "-").toLowerCase();
 
     const formData = new FormData();
     if (file) formData.append("file", file);
-    formData.append("filename", filename);
+    formData.append("filename", filename + ".png");
+
     const { message, type } = await createSketch(formData);
 
     toast({
@@ -77,31 +86,25 @@ function SketchForm({ user }: { user: User }) {
       variant: type === "error" ? "destructive" : null,
       className: type !== "error" ? "bg-green-300" : undefined,
     });
+    localStorage.removeItem(user.email || "");
     form.reset();
     canvasRef.current?.resetCanvas();
+    router.push("/dashboard");
   };
 
-  // const saveToIndexDB = async () => {
-  //   // Save the canvas data to IndexedDB when the user leaves the canvas
-  //   const dataURL = canvasRef.current?.exportImage("png");
-  //   const key = user.id + title.split(" ").join("-");
-  //   try {
-  //     const id = await update({ key, value: dataURL }, "sketch-progress");
-  //     console.log("Saved canvas data with id:", id);
-  //   } catch (error) {
-  //     console.log("Failed to save canvas data:", error);
-  //   }
-  // };
-
-  // React.useEffect(() => {
-  //   getByIndex("userId", user?.id)
-  //     .then((data) => {
-  //       console.log(data);
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  // }, [user?.id, getByIndex]);
+  const saveLocaly = async () => {
+    const data = await canvasRef.current?.exportPaths();
+    const key = user.email || "";
+    if (data && data.length > 0 && name.length > 0) {
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          name: name,
+          canvas: data,
+        })
+      );
+    }
+  };
 
   return (
     <section className="max-w-xl mx-auto">
@@ -295,14 +298,22 @@ function SketchForm({ user }: { user: User }) {
               Clear
             </Button>
           </div>
-          <div className="grid gap-2">
+          <div className="grid gap-2" onMouseLeave={saveLocaly}>
             <ReactSketchCanvas
-              className="w-full min-h-80 border border-gray-300 rounded-md"
+              className={cn(
+                "w-full min-h-80 border border-gray-300 rounded-md",
+                {
+                  "cursor-not-allowed pointer-events-none": isSubmitting,
+                }
+              )}
               ref={canvasRef}
               strokeWidth={pencil}
               eraserWidth={eraser}
               strokeColor={stroke}
               canvasColor={bg}
+              exportWithBackgroundImage={true}
+              backgroundImage={"/watermark.png"}
+              preserveBackgroundImageAspectRatio="xMaxYMin"
             />
           </div>
           <div>

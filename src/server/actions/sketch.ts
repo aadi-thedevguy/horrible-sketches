@@ -14,6 +14,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 const supabase = createClient();
+const bucket = process.env.CLOUDINARY_BUCKET;
 
 export async function createSketch(formData: FormData) {
   // validate the form data
@@ -63,7 +64,7 @@ export async function createSketch(formData: FormData) {
   // upload image
   try {
     const result = await cloudinary.uploader.upload(file, {
-      folder: "sketches",
+      folder: bucket,
       public_id: filename,
     });
 

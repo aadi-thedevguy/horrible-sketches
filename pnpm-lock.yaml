@@ -80,9 +80,6 @@ importers:
       react-hook-form:
         specifier: ^7.51.1
         version: 7.51.1(react@18.3.1)
-      react-indexed-db-hook:
-        specifier: ^1.0.14
-        version: 1.0.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-sketch-canvas:
         specifier: ^6.2.0
         version: 6.2.0(react@18.3.1)
@@ -2456,12 +2453,6 @@ packages:
     engines: {node: '>=12.22.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18
-
-  react-indexed-db-hook@1.0.14:
-    resolution: {integrity: sha512-tQ6rWofgXUCBhZp9pRpWzthzPbjqcll5uXMo07lbQTKl47VyL9nw9wfVswRxxzS5yj5Sq/VHUkNUjamWbA/M/w==}
-    peerDependencies:
-      react: ^18.2.0
-      react-dom: ^18.2.0
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -5185,11 +5176,6 @@ snapshots:
   react-hook-form@7.51.1(react@18.3.1):
     dependencies:
       react: 18.3.1
-
-  react-indexed-db-hook@1.0.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
 
   react-is@16.13.1: {}
 

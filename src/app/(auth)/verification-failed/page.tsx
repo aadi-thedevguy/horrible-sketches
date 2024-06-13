@@ -5,11 +5,11 @@ import { ArrowBigLeftDash } from "lucide-react";
 
 export default function Failed() {
   return (
-    <main className="max-w-3xl mx-auto bg-white mt-10">
+    <main className="w-11/12 md:max-w-3xl mx-auto bg-white mt-10 h-screen">
       <header className="py-8 flex justify-center w-full">
         <Image width={200} height={180} src="/preview.png" alt="logo" />
       </header>
-      <section className="h-48 bg-red-500 rounded-md w-full text-white flex items-center justify-center flex-col gap-5 mb-4">
+      <section className="min-h-48 bg-red-500 rounded-md py-8 text-white flex items-center justify-center flex-col gap-5 mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-[1px] bg-white"></div>
           <EmailIcon />
@@ -24,7 +24,7 @@ export default function Failed() {
           </h5>
         </div>
       </section>
-      <Link href={"/sign-in"} className={buttonVariants()}>
+      <Link href={"/sign-in"} className={buttonVariants({ variant: "ghost" })}>
         <ArrowBigLeftDash /> Try Again
       </Link>
     </main>

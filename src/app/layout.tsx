@@ -51,7 +51,7 @@ export default async function RootLayout({
           <Navbar />
 
           <main className="my-4">{children}</main>
-          <p className="mt-4 p-4 w-full text-center relative bottom-0">
+          <p className="mt-4 p-4 w-full text-center">
             ©️ {new Date().getFullYear()}
             <a
               href="https://thedevguy.in"

@@ -10,6 +10,9 @@
 # testing
 /coverage
 
+# db
+drizzle
+data
 # next.js
 /.next/
 /out/

@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { createAvatar } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/client";
-import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import { QueryClient, useMutation } from "@tanstack/react-query";
 import { User } from "@supabase/supabase-js";
 
 function AvatarMenu({ user }: { user: User }) {
@@ -31,9 +31,8 @@ function AvatarMenu({ user }: { user: User }) {
   const { mutate } = useMutation({
     mutationFn: async () => await supabase.auth.signOut(),
     onSuccess: () => {
-      client.invalidateQueries({ queryKey: ["user"] });
       router.refresh();
-      router.push("/sign-in");
+      // router.push("/sign-in");
     },
     onError: (error) => {
       toast({

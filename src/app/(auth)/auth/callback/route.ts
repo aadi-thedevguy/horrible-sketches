@@ -20,17 +20,27 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createClient();
-  const { error } = await supabase.auth.verifyOtp({
+  const {
+    error: verifyError,
+    data: { user },
+  } = await supabase.auth.verifyOtp({
     type,
     token_hash,
   });
-  if (error) {
+  if (verifyError) {
     redirectTo.pathname = "/verification-failed";
     return NextResponse.redirect(redirectTo);
   }
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+
+  // const {
+  //   data: { user },
+  //   error,
+  // } = await supabase.auth.getUser();
+  // console.log(user);
+  // if (error || !user) {
+  //   redirectTo.pathname = "/verification-failed";
+  //   return NextResponse.redirect(redirectTo);
+  // }
 
   try {
     if (user?.id && user?.email) {
@@ -45,6 +55,7 @@ export async function GET(request: NextRequest) {
         .onConflictDoNothing({ target: profile.id });
 
       redirectTo.searchParams.delete("next");
+      redirectTo.searchParams.delete("code");
       return NextResponse.redirect(redirectTo);
     }
   } catch (error) {

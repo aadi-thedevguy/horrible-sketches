@@ -50,7 +50,7 @@ export default async function RootLayout({
           <Toaster />
           <Navbar />
 
-          <main className="my-4">{children}</main>
+          <main className="my-4 min-h-screen">{children}</main>
           <p className="mt-4 p-4 w-full text-center">
             ©️ {new Date().getFullYear()}
             <a

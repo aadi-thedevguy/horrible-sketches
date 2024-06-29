@@ -6,6 +6,21 @@ export const validateFile = z.object({
     .string()
     .min(1, { message: "File is required" })
     .startsWith("data:image/png;base64,"),
+  canvasPath: z.object({
+    paths: z
+      .array(
+        z.object({
+          x: z.number(),
+          y: z.number(),
+        })
+      )
+      .length(5),
+    strokeWidth: z.number().min(1).max(10),
+    strokeColor: z.string().default("#000000"),
+    drawMode: z.boolean(),
+    startTimestamp: z.number().optional(),
+    endTimestamp: z.number().optional(),
+  }),
   // edit: z.boolean().default(false),
   // id: z.string().min(10).optional(),
 });

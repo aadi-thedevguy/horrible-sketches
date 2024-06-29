@@ -5,18 +5,24 @@ import { db } from "@/lib/db";
 import { sketch } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
 
-export async function getUserSketches(
-  authorId: string,
-  limit: number = constants.RESULTS_PER_PAGE,
-  page: number = 1
-) {
-  const data = await db
-    .select()
-    .from(sketch)
-    .where(eq(sketch.authorId, authorId))
-    .orderBy(desc(sketch.updatedAt)) // order by is mandatory
-    .limit(limit) // the number of rows to return
-    .offset((page - 1) * limit); // the number of rows to skip
+export async function getUserSketches({
+  authorId,
+  limit = constants.RESULTS_PER_PAGE,
+  page = 1,
+}: {
+  authorId: string;
+  page?: number;
+  limit?: number;
+}) {
+  const data = await db.query.sketch.findMany({
+    with: {
+      author: true,
+    },
+    where: (table, funcs) => funcs.and(funcs.eq(sketch.authorId, authorId)),
+    orderBy: desc(sketch.updatedAt),
+    limit: limit,
+    offset: (page - 1) * limit,
+  });
 
   return data;
 }

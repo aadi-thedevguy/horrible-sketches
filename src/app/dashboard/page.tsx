@@ -1,8 +1,6 @@
-import ImageGrid from "@/components/ImageGrid";
-import { Button } from "@/components/ui/button";
+import { Gallery } from "@/components/dashboard/Gallery";
 import { createClient } from "@/lib/supabase/server";
 import { getUserSketches } from "@/server/queries/sketch";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import React from "react";
 
@@ -16,17 +14,12 @@ async function Dashboard() {
   if (!data.user) {
     redirect("/sign-in");
   }
-  const items = await getUserSketches(data.user?.id);
+  const items = await getUserSketches({ authorId: data.user?.id });
   if (items.length === 0) return null;
 
   return (
     <>
-      <p className="text-xl text-center my-4">
-        <Link href={"/sketch/create"}>
-          <Button variant={"secondary"}>Create Sketch</Button>
-        </Link>
-      </p>
-      <ImageGrid items={items} />
+      <Gallery user={data.user} sketches={items} />
     </>
   );
 }

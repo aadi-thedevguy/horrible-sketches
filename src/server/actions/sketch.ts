@@ -7,6 +7,7 @@ import { genericMessages } from "@/constants";
 import { validateFile } from "@/lib/validations";
 import { createClient } from "@/lib/supabase/server";
 import { v2 as cloudinary } from "cloudinary";
+import { generateRandomString } from "@/lib/utils";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -18,13 +19,34 @@ const bucket = process.env.CLOUDINARY_BUCKET;
 
 export async function createSketch(formData: FormData) {
   // validate the form data
-  const obj = Object.fromEntries(formData);
-  const parsed = validateFile.safeParse(obj);
+  const canvas = formData.get("canvas");
+  let canvasObj = undefined;
+  if (typeof canvas === "string") {
+    canvasObj = JSON.parse(canvas);
+  }
+  const file = formData.get("file");
+  const filename = formData.get("filename");
 
-  if (!parsed.success) {
+  const parsedFile = validateFile.safeParse(file);
+  if (!parsedFile.success) {
     return {
       type: "error",
-      message: parsed.error.message,
+      message: parsedFile.error.message,
+    };
+  }
+
+  const parsedFilename = validateFile.safeParse(filename);
+  if (!parsedFilename.success) {
+    return {
+      type: "error",
+      message: parsedFilename.error.message,
+    };
+  }
+  const parsedCanvasData = validateFile.safeParse(canvasObj);
+  if (!parsedCanvasData.success) {
+    return {
+      type: "error",
+      message: parsedCanvasData.error.message,
     };
   }
 
@@ -46,16 +68,25 @@ export async function createSketch(formData: FormData) {
     };
   }
 
-  const { filename, file } = parsed.data;
-
   // if (!id && !edit) {
   // first check if existing sketch with same title exists or not
-  const result = await db
-    .select()
-    .from(sketch)
-    .where(eq(sketch.filename, filename));
+  // const result = await db.query.sketch.findFirst({
+  //   columns : [sketch.filename, sketch.id],
+  //   where : eq(sketch.filename, filename)
+  // })
 
-  if (result.length > 0) {
+  const sharableAuthorId = generateRandomString(7);
+
+  const result = await db.query.sketch.findFirst({
+    columns: { id: true, filename: true },
+    where: (table, funcs) =>
+      funcs.and(
+        funcs.eq(sketch.authorId, user?.id),
+        funcs.eq(sketch.filename, parsedFilename.data.filename)
+      ),
+  });
+
+  if (result) {
     return {
       type: "error",
       message: genericMessages.SKETCH_ALREADY_EXISTS,
@@ -63,20 +94,27 @@ export async function createSketch(formData: FormData) {
   }
   // upload image
   try {
-    const result = await cloudinary.uploader.upload(file, {
+    const result = await cloudinary.uploader.upload(parsedFile.data.file, {
       folder: bucket,
-      public_id: filename,
+      public_id: parsedFilename.data.filename,
     });
 
-    // create sketch in database
-    await db.insert(sketch).values({
-      url: result.secure_url,
-      filename,
-      authorId: user?.id,
-    });
+    const savedSketch = await db
+      .insert(sketch)
+      .values({
+        url: result.secure_url,
+        authorId: user?.id,
+        filename: parsedFilename.data.filename,
+        sharableAuthorId,
+        canvasPath: parsedCanvasData.data.canvasPath,
+      })
+      .returning();
+
+    const link = `${process.env.SERVER_URL}/author/${savedSketch[0].sharableAuthorId}/${savedSketch[0].id}`;
     return {
       type: "success",
       message: genericMessages.CREATE_SKETCH_SUCCESS,
+      link,
     };
   } catch (error) {
     if (error instanceof Error) {

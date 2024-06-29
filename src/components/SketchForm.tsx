@@ -6,7 +6,7 @@ import {
 } from "react-sketch-canvas";
 import Image from "next/image";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Undo2Icon,
   Redo2Icon,
@@ -16,6 +16,7 @@ import {
   UserCheck2,
   Paintbrush,
   RefreshCcw,
+  CheckIcon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
@@ -28,6 +29,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Copy } from "lucide-react";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { constants } from "@/constants";
 import { sketchformSchema } from "@/lib/validations";
 import { z } from "zod";
@@ -39,6 +51,17 @@ import { User } from "@supabase/supabase-js";
 
 function SketchForm({ user }: { user: User }) {
   const router = useRouter();
+  const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
+  const [sharableLink, setSharableLink] = React.useState("");
+  const [isCopied, setIsCopied] = React.useState(false);
+
+  function copyText(link: string) {
+    if (typeof window !== "undefined" && window.navigator.clipboard) {
+      navigator.clipboard.writeText(link);
+      setIsCopied(true);
+    }
+  }
+
   const canvasRef = React.useRef<ReactSketchCanvasRef>(null);
   const form = useForm({
     resolver: zodResolver(sketchformSchema),
@@ -72,24 +95,31 @@ function SketchForm({ user }: { user: User }) {
 
   const onSubmit = async (values: z.infer<typeof sketchformSchema>) => {
     const file = await canvasRef.current?.exportImage("png");
+    const canvas = await canvasRef.current?.exportPaths();
     const filename = values.name.replace(/\s/g, "-").toLowerCase();
 
     const formData = new FormData();
     if (file) formData.append("file", file);
-    formData.append("filename", filename + ".png");
+    formData.append("filename", filename);
+    formData.append("canvas", JSON.stringify(canvas));
 
-    const { message, type } = await createSketch(formData);
+    const { message, type, link } = await createSketch(formData);
 
     toast({
       title: type.charAt(0).toUpperCase() + type.slice(1),
       description: message,
       variant: type === "error" ? "destructive" : null,
-      className: type !== "error" ? "bg-green-300" : undefined,
     });
-    localStorage.removeItem(user.email || "");
-    form.reset();
-    canvasRef.current?.resetCanvas();
-    router.push("/dashboard");
+    if (type === "success") {
+      localStorage.removeItem(user.email || "");
+      form.reset();
+      canvasRef.current?.resetCanvas();
+
+      if (link) {
+        setSharableLink(link);
+        setIsConfirmOpen(true);
+      }
+    }
   };
 
   const saveLocaly = async () => {
@@ -311,18 +341,62 @@ function SketchForm({ user }: { user: User }) {
               eraserWidth={eraser}
               strokeColor={stroke}
               canvasColor={bg}
-              exportWithBackgroundImage={true}
-              backgroundImage={"/watermark.png"}
-              preserveBackgroundImageAspectRatio="xMaxYMin"
             />
           </div>
-          <div>
+          <div className="flex gap-4">
             <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? "Creating" : "Create"}{" "}
               {isSubmitting ? (
                 <RefreshCcw className="animate-spin w-4 h-4 ml-2" />
               ) : null}
             </Button>
+            <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+              {/* <DialogTrigger asChild>
+                  <Button variant="outline">Share</Button>
+                </DialogTrigger> */}
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Share link</DialogTitle>
+                  <DialogDescription>
+                    Anyone who has this link will be able to view this.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex items-center space-x-2">
+                  <div className="grid flex-1 gap-2">
+                    <Label htmlFor="link" className="sr-only">
+                      Link
+                    </Label>
+                    <Input id="link" value={sharableLink} readOnly />
+                  </div>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    variant="ghost"
+                    className="px-3"
+                    onClick={() => copyText(sharableLink)}
+                  >
+                    <span className="sr-only">Copy</span>
+                    {isCopied ? (
+                      <CheckIcon className="w-4 h-4 text-green-400" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <DialogFooter className="gap-2 items-center">
+                  <Link href="/dashboard">
+                    <Button type="button" variant="secondary">
+                      Go to Dashboard
+                    </Button>
+                  </Link>
+                  <DialogClose asChild>
+                    <Button type="button" variant="ghost">
+                      Close
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </form>
       </Form>

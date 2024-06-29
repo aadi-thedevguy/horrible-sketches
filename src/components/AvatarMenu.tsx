@@ -20,6 +20,11 @@ import { createAvatar } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/client";
 import { QueryClient, useMutation } from "@tanstack/react-query";
 import { User } from "@supabase/supabase-js";
+import {
+  ArrowUpRightFromSquare,
+  LayoutDashboard,
+  LucideArrowUpRightFromSquare,
+} from "lucide-react";
 
 function AvatarMenu({ user }: { user: User }) {
   let avatar = createAvatar(
@@ -72,11 +77,13 @@ function AvatarMenu({ user }: { user: User }) {
             href="/dashboard"
             className={buttonVariants({ variant: "link" })}
           >
+            <LayoutDashboard className="w-4 h-4 mr-2" />
             Dashboard
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem>
           <Button variant="link" onClick={() => mutate()}>
+            <LucideArrowUpRightFromSquare className="w-4 h-4 mr-2" />
             Sign Out
           </Button>
         </DropdownMenuItem>

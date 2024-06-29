@@ -19,9 +19,10 @@ export const genericMessages = {
 };
 
 export const constants = {
+  RANDOM_STRING_LENGTH: 7,
   BACKGROUND: "#fd8153",
   TEXT: "#0a0a0a",
-  RESULTS_PER_PAGE: 10,
+  RESULTS_PER_PAGE: 5,
   ICON: "/logo.png",
   THUMBNAIL: "/thumbnail.png",
   SITE_URL: "https://horrible-sketches.thedevguy.in",

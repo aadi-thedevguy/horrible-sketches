@@ -25,7 +25,7 @@ import {
   SendIcon,
   TrashIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { ISketch } from "@/lib/db/schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -36,10 +36,13 @@ import { Button } from "../ui/button";
 
 export function FileCardActions({ file }: { file: ISketch }) {
   const { toast } = useToast();
-  const link =
-    window && typeof window !== "undefined"
-      ? `${window.location.origin}/author/${file.sharableAuthorId}/${file.id}`
-      : "";
+  const [link, setlink] = useState("");
+  useEffect(() => {
+    if (window && typeof window !== "undefined") {
+      const link = `${window.location.origin}/author/${file.sharableAuthorId}/${file.id}`;
+      setlink(link);
+    }
+  }, []);
 
   const queryClient = useQueryClient();
   const { mutate, data, error, isPending } = useMutation({

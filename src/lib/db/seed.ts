@@ -4,10 +4,12 @@ import { sketch } from "./schema";
 
 async function seedSketches() {
   try {
+    console.log("seeding sketches....");
     await db.insert(sketch).values([
       {
         authorId: "f290edb2-44fa-425d-9455-f300fe125ac0",
         sharableAuthorId: generateRandomString(),
+        originalName: "sketch1",
         filename: "sketch1",
         url: "https://picsum.photos/id/20/200/300",
       },
@@ -15,24 +17,28 @@ async function seedSketches() {
         authorId: "f290edb2-44fa-425d-9455-f300fe125ac0",
         sharableAuthorId: generateRandomString(),
         filename: "sketch2",
+        originalName: "sketch2",
         url: "https://picsum.photos/id/21/200/300",
       },
       {
         authorId: "f290edb2-44fa-425d-9455-f300fe125ac0",
         sharableAuthorId: generateRandomString(),
         filename: "sketch3",
+        originalName: "sketch3",
         url: "https://picsum.photos/id/22/200/300",
       },
       {
         authorId: "f290edb2-44fa-425d-9455-f300fe125ac0",
         sharableAuthorId: generateRandomString(),
         filename: "sketch4",
+        originalName: "sketch4",
         url: "https://picsum.photos/id/230/200/300",
       },
       {
         authorId: "f290edb2-44fa-425d-9455-f300fe125ac0",
         sharableAuthorId: generateRandomString(),
         filename: "sketch5",
+        originalName: "sketch5",
         url: "https://picsum.photos/id/240/200/300",
       },
       {
@@ -40,10 +46,12 @@ async function seedSketches() {
         sharableAuthorId: generateRandomString(),
         filename: "sketch6",
         url: "https://picsum.photos/id/250/200/300",
+        originalName: "sketch6",
       },
     ]);
+    console.log("successfully seeded sketches");
   } catch (error) {
     console.error(error);
   }
 }
-// seedSketches();
+seedSketches();

@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -7,32 +8,24 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { searchSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, SearchIcon } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 
-const formSchema = z.object({
-  query: z.string().min(0).max(200),
-});
-
-export function SearchBar({
-  query,
-  setQuery,
-}: {
-  query: string;
-  setQuery: Dispatch<SetStateAction<string>>;
-}) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+export function SearchBar({ query }: { query?: string }) {
+  const router = useRouter();
+  const form = useForm<z.infer<typeof searchSchema>>({
+    resolver: zodResolver(searchSchema),
     defaultValues: {
       query,
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setQuery(values.query);
+  async function onSubmit(values: z.infer<typeof searchSchema>) {
+    router.push(`/sketch/search?query=${values.query}`);
   }
 
   return (
@@ -56,11 +49,10 @@ export function SearchBar({
           />
 
           <Button
-            size="sm"
             type="submit"
             variant="secondary"
             disabled={form.formState.isSubmitting}
-            className="flex gap-1"
+            className="gap-2"
           >
             {form.formState.isSubmitting && (
               <Loader2 className="h-4 w-4 animate-spin" />

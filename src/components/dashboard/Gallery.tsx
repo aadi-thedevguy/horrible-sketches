@@ -1,46 +1,17 @@
 "use client";
-import Link from "next/link";
 import Image from "next/image";
-import React, { useState } from "react";
+import React from "react";
 import { User } from "@supabase/supabase-js";
-import {
-  SkullIcon,
-  ImageIcon,
-  Brush,
-  AlertCircle,
-  LoaderPinwheel,
-} from "lucide-react";
-import { SearchBar } from "./search-bar";
-import { Button } from "../ui/button";
+import { ImageIcon, AlertCircle, LoaderPinwheel } from "lucide-react";
 import { useInView } from "react-intersection-observer";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getUserSketches } from "@/server/queries/sketch";
 import { FileCardActions } from "./file-actions";
 import { ISketch } from "@/lib/db/schema";
 import GridPlaceholder from "./CardPlaceholder";
-
-function Placeholder() {
-  return (
-    <div className="flex flex-col gap-8 w-full items-center mt-24">
-      <SkullIcon className="w-80 h-80" />
-      <div className="text-2xl">You have no Sketches, Draw one now</div>
-      <Link href="/sketch/create">
-        <Button className="gap-1">
-          <span>Let&apos; Draw</span>
-          <Brush size={14} />
-        </Button>
-      </Link>
-    </div>
-  );
-}
+import Placeholder from "./Placeholder";
 
 export function Gallery({
   user,
@@ -49,8 +20,6 @@ export function Gallery({
   user: User;
   sketches: ISketch[];
 }) {
-  const [query, setQuery] = useState("");
-
   const { ref, inView } = useInView();
   const {
     status,
@@ -84,20 +53,7 @@ export function Gallery({
   }, [inView]);
 
   return (
-    <section className="max-w-screen-xl mx-auto p-6">
-      <div className="flex flex-wrap gap-4 justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">Your Sketches</h1>
-
-        <SearchBar query={query} setQuery={setQuery} />
-
-        <Link href="/sketch/create">
-          <Button className="gap-1">
-            <span>Let&apos; Draw</span>
-            <Brush size={14} />
-          </Button>
-        </Link>
-      </div>
-
+    <>
       {status === "error" && (
         <Alert variant="destructive" className="my-4 max-w-xl mx-auto">
           <AlertCircle className="h-4 w-4" />
@@ -106,7 +62,7 @@ export function Gallery({
         </Alert>
       )}
 
-      {data?.pages.length === 0 && <Placeholder />}
+      {data?.pages.length <= 0 && <Placeholder />}
 
       {isFetching && !isFetchingNextPage && <GridPlaceholder />}
 
@@ -138,16 +94,6 @@ export function Gallery({
                     />
                   )}
                 </CardContent>
-                <CardFooter className="flex justify-between">
-                  <div className="text-xs text-gray-700">
-                    Created on{" "}
-                    {file.updatedAt.toLocaleString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </div>
-                </CardFooter>
               </Card>
             ))}
           </React.Fragment>
@@ -161,6 +107,6 @@ export function Gallery({
       ) : null}
 
       <div ref={ref} className="mt-24" />
-    </section>
+    </>
   );
 }

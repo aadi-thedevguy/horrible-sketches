@@ -1,6 +1,6 @@
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardHeader, CardContent, CardFooter } from "../ui/card";
+import { Card, CardHeader, CardContent } from "../ui/card";
 
 function GridPlaceholder({ length = 3 }: { length?: number }) {
   return (
@@ -13,9 +13,6 @@ function GridPlaceholder({ length = 3 }: { length?: number }) {
           <CardContent>
             <Skeleton className="h-52 w-72 rounded-xl" />
           </CardContent>
-          <CardFooter>
-            <Skeleton className="w-14 h-4 rounded-md" />
-          </CardFooter>
         </Card>
       ))}
     </div>

@@ -31,25 +31,28 @@ export const sketch = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     url: text("url").notNull(),
+    originalName: text("original_name").notNull(),
     filename: text("filename").notNull(),
     authorId: uuid("author_id")
       .notNull()
       .references(() => profile.id),
     views: integer("views").notNull().default(0),
-    canvasPath: json("canvas_path").default({
-      paths: [{ x: 0, y: 0 }],
-      strokeWidth: 5,
-      strokeColor: "#000000",
-      drawMode: false,
-    }),
-    sharableAuthorId: text("sharable_author_id").notNull(),
+    canvasBg: text("canvas_bg").default("#ffffff"),
+    canvasPath: json("canvas_path::json[]").default([
+      {
+        paths: [{ x: 0, y: 0 }],
+        strokeWidth: 5,
+        strokeColor: "#000000",
+        drawMode: false,
+      },
+    ]),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => {
     return {
       fileIdx: index("file_idx").on(table.filename),
-      authorIdx: index("author_idx").on(table.sharableAuthorId),
+      authorIdx: index("author_idx").on(table.authorId),
     };
   }
 );

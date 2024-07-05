@@ -89,25 +89,30 @@ function SketchForm({ user }: { user: User }) {
         const parsed = JSON.parse(data);
         canvasRef.current?.loadPaths(parsed.canvas);
         form.setValue("name", parsed.name);
+        form.setValue("canvasBg", parsed.canvasBg);
       }
     }
   }, [user.email]);
 
   const onSubmit = async (values: z.infer<typeof sketchformSchema>) => {
-    const file = await canvasRef.current?.exportImage("png");
-    const canvas = await canvasRef.current?.exportPaths();
     const filename = values.name.replace(/\s/g, "-").toLowerCase();
+    const file = await canvasRef.current?.exportImage("png");
+    const canvas = (await canvasRef.current?.exportPaths()) || [];
 
-    const formData = new FormData();
-    if (file) formData.append("file", file);
-    formData.append("filename", filename);
-    formData.append("canvas", JSON.stringify(canvas));
+    const sketchData = {
+      originalName: values.name,
+      canvas,
+      filename,
+      canvasBg: bg,
+      file: file || "",
+    };
 
-    const { message, type, link } = await createSketch(formData);
+    const { message, type, link } = await createSketch(sketchData);
 
     toast({
       title: type.charAt(0).toUpperCase() + type.slice(1),
       description: message,
+      className: type === "success" ? "bg-green-500" : "",
       variant: type === "error" ? "destructive" : null,
     });
     if (type === "success") {
@@ -131,6 +136,7 @@ function SketchForm({ user }: { user: User }) {
         JSON.stringify({
           name: name,
           canvas: data,
+          canvasBg: bg,
         })
       );
     }

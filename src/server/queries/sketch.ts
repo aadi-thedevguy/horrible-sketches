@@ -32,15 +32,25 @@ export async function getUserSketches({
   return data;
 }
 
+export async function getSketchById(id: string) {
+  if (!id) {
+    throw new Error("No id provided");
+  }
+  const data = await db.query.sketch.findFirst({
+    where: (table, funcs) => funcs.eq(sketch.id, id),
+    with: {
+      author: true,
+    },
+  });
+
+  return data;
+}
+
 export async function searchSketches(obj: z.infer<typeof searchSchema>) {
   const parsed = searchSchema.safeParse(obj);
 
   if (!parsed.success) {
-    return {
-      type: "error",
-      message: parsed.error.message,
-      result: [],
-    };
+    throw new Error(parsed.error.message);
   }
   const { query, page } = parsed.data;
   // const limit = constants.RESULTS_PER_PAGE;
@@ -50,47 +60,23 @@ export async function searchSketches(obj: z.infer<typeof searchSchema>) {
     error: authError,
   } = await supabase.auth.getUser();
   if (authError) {
-    return {
-      type: "error",
-      message: authError.message,
-      result: [],
-    };
+    throw new Error(authError.message);
   }
   if (!user) {
-    return {
-      type: "error",
-      message: genericMessages.NO_USER_FOUND,
-      result: [],
-    };
+    throw new Error(genericMessages.NO_USER_FOUND);
   }
 
-  try {
-    const data = await db.query.sketch.findMany({
-      with: {
-        author: true,
-      },
-      where: (table, funcs) =>
-        funcs.and(
-          funcs.ilike(sketch.filename, `%${query}%`),
-          funcs.eq(sketch.authorId, user?.id)
-        ),
-      orderBy: desc(sketch.updatedAt),
-      // limit: limit,
-      // offset: (page - 1) * limit,
-    });
-
-    return {
-      type: "success",
-      message: "Successfully Fetched Sketches",
-      result: data,
-    };
-  } catch (error) {
-    if (error instanceof Error) {
-      return {
-        type: "error",
-        message: error.message,
-        result: [],
-      };
-    }
-  }
+  return await db.query.sketch.findMany({
+    with: {
+      author: true,
+    },
+    where: (table, funcs) =>
+      funcs.and(
+        funcs.ilike(sketch.filename, `%${query}%`),
+        funcs.eq(sketch.authorId, user?.id)
+      ),
+    orderBy: desc(sketch.updatedAt),
+    // limit: limit,
+    // offset: (page - 1) * limit,
+  });
 }

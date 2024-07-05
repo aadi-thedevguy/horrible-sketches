@@ -33,29 +33,37 @@ import { deleteSketch } from "@/server/actions/sketch";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { genericMessages } from "@/constants";
 
-export function FileCardActions({ file }: { file: ISketch }) {
+export function FileCardActions({
+  file,
+  query,
+}: {
+  file: ISketch;
+  query?: string;
+}) {
   const { toast } = useToast();
   const [link, setlink] = useState("");
   useEffect(() => {
     if (window && typeof window !== "undefined") {
-      const link = `${window.location.origin}/author/${file.sharableAuthorId}/${file.id}`;
+      const link = `${window.location.origin}/sketch/${file.id}`;
       setlink(link);
     }
-  }, []);
+  }, [file.id]);
 
   const queryClient = useQueryClient();
-  const { mutate, data, error, isPending } = useMutation({
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["delete-sketch"],
     mutationFn: async () => await deleteSketch(file.id),
     onSuccess: () => {
       toast({
         title: "Success",
-        description: data?.message,
+        description: genericMessages.DELETE_SKETCH_SUCCESS,
         className: "bg-green-300",
       });
       setIsDeleteDialogOpen(false);
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: "Error",
         description: error?.message,
@@ -63,7 +71,15 @@ export function FileCardActions({ file }: { file: ISketch }) {
       });
     },
     onSettled: async () => {
-      return await queryClient.invalidateQueries({ queryKey: ["sketches"] });
+      if (query)
+        return await queryClient.invalidateQueries({
+          queryKey: ["search-sketch", query],
+        });
+      else {
+        return await queryClient.invalidateQueries({
+          queryKey: ["sketches"],
+        });
+      }
     },
   });
 
@@ -90,8 +106,8 @@ export function FileCardActions({ file }: { file: ISketch }) {
           </DialogHeader>
 
           <DialogFooter className="gap-2 items-center">
-            <DialogClose asChild>
-              <Button type="button" variant="ghost">
+            <DialogClose asChild disabled={isPending}>
+              <Button type="button" variant="ghost" disabled={isPending}>
                 Cancel
               </Button>
             </DialogClose>

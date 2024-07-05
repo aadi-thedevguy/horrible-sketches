@@ -52,12 +52,11 @@ export function SearchBar({ query }: { query?: string }) {
             type="submit"
             variant="secondary"
             disabled={form.formState.isSubmitting}
-            className="gap-2"
           >
             {form.formState.isSubmitting && (
               <Loader2 className="h-4 w-4 animate-spin" />
             )}
-            <SearchIcon /> Search
+            <SearchIcon />
           </Button>
         </form>
       </Form>

@@ -9,7 +9,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import React from "react";
 
-async function Dashboard() {
+export default async function page() {
   const supabase = createClient();
   const { data, error } = await supabase.auth.getUser();
 
@@ -26,9 +26,7 @@ async function Dashboard() {
     <section className="max-w-screen-xl mx-auto p-6">
       <div className="flex flex-wrap gap-4 justify-between items-center mb-8">
         <h1 className="text-4xl font-bold">Your Sketches</h1>
-
         <SearchBar />
-
         <Link href="/sketch/create">
           <Button className="gap-1">
             <span>Let&apos; Draw</span>
@@ -40,5 +38,3 @@ async function Dashboard() {
     </section>
   );
 }
-
-export default Dashboard;

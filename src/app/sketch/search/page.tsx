@@ -63,13 +63,6 @@ function Search() {
         </Link>
       </div>
 
-      {data?.type === "error" && (
-        <Alert variant="destructive" className="my-4 max-w-xl mx-auto">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{data?.type.toUpperCase()}</AlertTitle>
-          <AlertDescription>{data?.message}</AlertDescription>
-        </Alert>
-      )}
       {isError && (
         <Alert variant="destructive" className="my-4 max-w-xl mx-auto">
           <AlertCircle className="h-4 w-4" />
@@ -79,7 +72,7 @@ function Search() {
       )}
 
       {isPending && <GridPlaceholder />}
-      {!isPending && data?.result && data.result.length <= 0 && (
+      {!isPending && data && data.length <= 0 && (
         <div className="flex flex-col gap-6 w-full items-center mt-24">
           <Image src="/preview.png" width={200} height={180} alt="logo" />
           <h2 className="text-2xl font-bold">
@@ -89,8 +82,8 @@ function Search() {
       )}
 
       <div className="grid grid-cols-3 gap-4">
-        {data?.result &&
-          data.result.map((file) => (
+        {data &&
+          data.map((file) => (
             <Card key={file.id}>
               <CardHeader className="relative">
                 <CardTitle className="flex gap-2 text-base font-normal">
@@ -98,10 +91,10 @@ function Search() {
                     {" "}
                     <ImageIcon />
                   </div>{" "}
-                  {file.filename}
+                  {file.originalName}
                 </CardTitle>
                 <div className="absolute top-2 right-2">
-                  <FileCardActions file={file} />
+                  <FileCardActions file={file} query={query || ""} />
                 </div>
               </CardHeader>
               <CardContent className="h-[200px] flex justify-center items-center">

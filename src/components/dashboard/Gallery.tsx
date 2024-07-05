@@ -62,7 +62,7 @@ export function Gallery({
         </Alert>
       )}
 
-      {data?.pages.length <= 0 && <Placeholder />}
+      {data?.pages[0].length <= 0 && <Placeholder />}
 
       {isFetching && !isFetchingNextPage && <GridPlaceholder />}
 
@@ -77,7 +77,7 @@ export function Gallery({
                       {" "}
                       <ImageIcon />
                     </div>{" "}
-                    {file.filename}
+                    {file.originalName}
                   </CardTitle>
                   <div className="absolute top-2 right-2">
                     <FileCardActions file={file} />

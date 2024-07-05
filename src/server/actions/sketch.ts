@@ -7,7 +7,7 @@ import { genericMessages } from "@/constants";
 import { validateFile } from "@/lib/validations";
 import { createClient } from "@/lib/supabase/server";
 import { v2 as cloudinary } from "cloudinary";
-import { generateRandomString } from "@/lib/utils";
+import { z } from "zod";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -17,38 +17,17 @@ cloudinary.config({
 const supabase = createClient();
 const bucket = process.env.CLOUDINARY_BUCKET;
 
-export async function createSketch(formData: FormData) {
+export async function createSketch(sketchData: z.infer<typeof validateFile>) {
   // validate the form data
-  const canvas = formData.get("canvas");
-  let canvasObj = undefined;
-  if (typeof canvas === "string") {
-    canvasObj = JSON.parse(canvas);
-  }
-  const file = formData.get("file");
-  const filename = formData.get("filename");
+  const parsed = validateFile.safeParse(sketchData);
 
-  const parsedFile = validateFile.safeParse(file);
-  if (!parsedFile.success) {
+  if (!parsed.success) {
     return {
       type: "error",
-      message: parsedFile.error.message,
+      message: parsed.error.message,
     };
   }
-
-  const parsedFilename = validateFile.safeParse(filename);
-  if (!parsedFilename.success) {
-    return {
-      type: "error",
-      message: parsedFilename.error.message,
-    };
-  }
-  const parsedCanvasData = validateFile.safeParse(canvasObj);
-  if (!parsedCanvasData.success) {
-    return {
-      type: "error",
-      message: parsedCanvasData.error.message,
-    };
-  }
+  const { file, filename, originalName, canvas, canvasBg } = parsed.data;
 
   // check if user is logged in or not
   const {
@@ -75,14 +54,12 @@ export async function createSketch(formData: FormData) {
   //   where : eq(sketch.filename, filename)
   // })
 
-  const sharableAuthorId = generateRandomString(7);
-
   const result = await db.query.sketch.findFirst({
     columns: { id: true, filename: true },
     where: (table, funcs) =>
       funcs.and(
         funcs.eq(sketch.authorId, user?.id),
-        funcs.eq(sketch.filename, parsedFilename.data.filename)
+        funcs.eq(sketch.filename, filename)
       ),
   });
 
@@ -93,31 +70,46 @@ export async function createSketch(formData: FormData) {
     };
   }
   // upload image
-  try {
-    const result = await cloudinary.uploader.upload(parsedFile.data.file, {
-      folder: bucket,
-      public_id: parsedFilename.data.filename,
-    });
+  const { secure_url, public_id } = await cloudinary.uploader.upload(file, {
+    folder: bucket,
+    public_id: filename,
+  });
 
+  if (!secure_url) {
+    return {
+      type: "error",
+      message: genericMessages.SKETCH_UPLOAD_FAILED,
+    };
+  }
+  try {
     const savedSketch = await db
       .insert(sketch)
       .values({
-        url: result.secure_url,
+        url: secure_url,
         authorId: user?.id,
-        filename: parsedFilename.data.filename,
-        sharableAuthorId,
-        canvasPath: parsedCanvasData.data.canvasPath,
+        filename: filename,
+        canvasPath: canvas,
+        canvasBg: canvasBg,
+        originalName: originalName,
       })
       .returning();
 
-    const link = `${process.env.SERVER_URL}/author/${savedSketch[0].sharableAuthorId}/${savedSketch[0].id}`;
+    const link = `${process.env.SERVER_URL}/sketch/${savedSketch[0].id}`;
     return {
       type: "success",
       message: genericMessages.CREATE_SKETCH_SUCCESS,
       link,
     };
   } catch (error) {
+    // if db insertion fails, delete the image from cloudinary
+    try {
+      await cloudinary.uploader.destroy(public_id);
+      console.log("Image rollback successful:", public_id);
+    } catch (err) {
+      console.error("Error during image rollback");
+    }
     if (error instanceof Error) {
+      console.error(error.message);
       return {
         type: "error",
         message: error.message,
@@ -137,43 +129,27 @@ export async function deleteSketch(id: string) {
     error: authError,
   } = await supabase.auth.getUser();
   if (authError) {
-    return {
-      type: "error",
-      message: authError.message,
-    };
+    throw new Error(authError.message);
   }
   if (!user) {
-    return {
-      type: "error",
-      message: genericMessages.NO_USER_FOUND,
-    };
+    throw new Error(genericMessages.NO_USER_FOUND);
   }
 
-  try {
-    // check if user has permission to delete the sketch
-    const result = await db
-      .select({ id: sketch.id })
-      .from(sketch)
-      .where(and(eq(sketch.id, id), eq(sketch.authorId, user?.id)));
+  // check if user has permission to delete the sketch
+  const result = await db.query.sketch.findFirst({
+    where: (table, funcs) => funcs.eq(sketch.id, id),
+  });
 
-    await cloudinary.uploader.destroy(result[0]?.id);
-    await db
-      .delete(sketch)
-      .where(and(eq(sketch.id, id), eq(sketch.authorId, user?.id)));
-    return {
-      type: "success",
-      message: genericMessages.DELETE_SKETCH_SUCCESS,
-    };
-  } catch (error) {
-    if (error instanceof Error) {
-      return {
-        type: "error",
-        message: error.message,
-      };
-    }
-    return {
-      type: "error",
-      message: genericMessages.DELETE_SKETCH_FAILED,
-    };
+  if (!result) throw new Error(genericMessages.SKETCH_NOT_FOUND);
+
+  const deletedSketch = await cloudinary.uploader.destroy(
+    process.env.CLOUDINARY_BUCKET + "/" + result?.filename
+  );
+  if (deletedSketch.result !== "ok") {
+    throw new Error(genericMessages.DELETE_SKETCH_FAILED);
   }
+
+  await db
+    .delete(sketch)
+    .where(and(eq(sketch.id, id), eq(sketch.authorId, user?.id)));
 }

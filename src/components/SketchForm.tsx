@@ -98,10 +98,14 @@ function SketchForm({ user }: { user: User }) {
     const filename = values.name.replace(/\s/g, "-").toLowerCase();
     const file = await canvasRef.current?.exportImage("png");
     const canvas = (await canvasRef.current?.exportPaths()) || [];
-
+    const sanitised = [...canvas];
+    for (let i = 0; i < canvas.length; i++) {
+      // @ts-ignore
+      sanitised[i].strokeWidth = Number(canvas[i].strokeWidth);
+    }
     const sketchData = {
       originalName: values.name,
-      canvas,
+      canvas: sanitised,
       filename,
       canvasBg: bg,
       file: file || "",

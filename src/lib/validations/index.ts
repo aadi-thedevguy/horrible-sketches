@@ -20,7 +20,13 @@ export const validateFile = z.object({
           y: z.number(),
         })
       ),
-      strokeWidth: z.number().min(1).max(5).default(5),
+      strokeWidth: z
+        .number()
+        .min(1)
+        .max(5)
+        .transform((val) => Number(val))
+        .default(5),
+
       // strokeWidth: z
       //   .string()
       //   .regex(/^[0-5]+$/)
@@ -55,7 +61,7 @@ export const sketchformSchema = z.object({
 
 export const searchSchema = z.object({
   query: z.string().min(0).max(100).trim().toLowerCase(),
-  page: z.number().min(1).max(100).optional(),
+  page: z.number().min(1).max(100).default(1).optional(),
 });
 
 export const signupSchema = z.object({

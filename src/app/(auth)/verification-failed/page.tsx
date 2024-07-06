@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { buttonVariants } from "@/components/ui/button";
 import { ArrowBigLeftDash } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Failed() {
   return (
@@ -9,22 +10,26 @@ export default function Failed() {
       <header className="py-8 flex justify-center w-full">
         <Image width={200} height={180} src="/preview.png" alt="logo" />
       </header>
-      <section className="min-h-48 bg-red-500 rounded-md py-8 text-white flex items-center justify-center flex-col gap-5 mb-4">
+      <Alert
+        variant="destructive"
+        className="my-4 max-w-xl w-max mx-auto min-h-48 py-4 flex gap-4 flex-col"
+      >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-[1px] bg-white"></div>
+          <div className="w-10 h-[1px] bg-red-500"></div>
           <EmailIcon />
-          <div className="w-10 h-[1px] bg-white"></div>
+          <div className="w-10 h-[1px] bg-red-500"></div>
         </div>
-        <div className="flex flex-col gap-3 px-4">
-          <h3 className="text-center text-2xl tracking-widest font-bold">
-            EMAIL VERIFICATION FAILED
-          </h3>
-          <h5 className="text-xl tracking-wider font-medium">
-            Sorry, we could not verify your email due to some technical issues
-          </h5>
-        </div>
-      </section>
-      <Link href={"/sign-in"} className={buttonVariants({ variant: "ghost" })}>
+        <AlertTitle>EMAIL VERIFICATION FAILED</AlertTitle>
+        <AlertDescription>
+          Sorry, we could not verify your email due to some technical issues
+        </AlertDescription>
+      </Alert>
+      <Link
+        href={"/sign-in"}
+        className={buttonVariants({
+          variant: "ghost",
+        })}
+      >
         <ArrowBigLeftDash /> Try Again
       </Link>
     </main>

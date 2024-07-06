@@ -29,37 +29,35 @@ export function SearchBar({ query }: { query?: string }) {
   }
 
   return (
-    <div>
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex gap-2 items-center"
-        >
-          <FormField
-            control={form.control}
-            name="query"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} placeholder="Search Sketches" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex gap-2 items-center"
+      >
+        <FormField
+          control={form.control}
+          name="query"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input {...field} placeholder="Search Sketches" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <Button
-            type="submit"
-            variant="secondary"
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting && (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            )}
-            <SearchIcon />
-          </Button>
-        </form>
-      </Form>
-    </div>
+        <Button
+          type="submit"
+          variant="secondary"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting && (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          )}
+          <SearchIcon />
+        </Button>
+      </form>
+    </Form>
   );
 }

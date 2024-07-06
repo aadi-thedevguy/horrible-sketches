@@ -1,4 +1,4 @@
-import GridPlaceholder from "@/components/dashboard/CardPlaceholder";
+import GridPlaceholder from "@/components/dashboard/GridPlaceholder";
 import { Skeleton } from "@/components/ui/skeleton";
 import React from "react";
 

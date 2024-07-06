@@ -10,7 +10,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { getUserSketches } from "@/server/queries/sketch";
 import { FileCardActions } from "./file-actions";
 import { ISketch } from "@/lib/db/schema";
-import GridPlaceholder from "./CardPlaceholder";
+import GridPlaceholder from "./GridPlaceholder";
 import Placeholder from "./Placeholder";
 
 export function Gallery({

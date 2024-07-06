@@ -5,10 +5,8 @@ import { db } from "@/lib/db";
 import { sketch } from "@/lib/db/schema";
 import { createClient } from "@/lib/supabase/server";
 import { searchSchema } from "@/lib/validations";
-import { desc, eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import { z } from "zod";
-
-const supabase = createClient();
 
 export async function getUserSketches({
   authorId,
@@ -19,6 +17,13 @@ export async function getUserSketches({
   page?: number;
   limit?: number;
 }) {
+  const supabase = createClient();
+
+  const { data: user, error } = await supabase.auth.getUser();
+  if (error || !user) {
+    throw new Error(genericMessages.NO_USER_FOUND);
+  }
+
   const data = await db.query.sketch.findMany({
     with: {
       author: true,
@@ -34,10 +39,18 @@ export async function getUserSketches({
 
 export async function getSketchById(id: string) {
   if (!id) {
-    throw new Error("No id provided");
+    throw new Error(genericMessages.SKETCH_NOT_FOUND);
   }
   const data = await db.query.sketch.findFirst({
     where: (table, funcs) => funcs.eq(sketch.id, id),
+    columns: {
+      originalName: true,
+      canvasBg: true,
+      canvasPath: true,
+      filename: true,
+      updatedAt: true,
+      views: true,
+    },
     with: {
       author: true,
     },
@@ -54,6 +67,7 @@ export async function searchSketches(obj: z.infer<typeof searchSchema>) {
   }
   const { query, page } = parsed.data;
   // const limit = constants.RESULTS_PER_PAGE;
+  const supabase = createClient();
 
   const {
     data: { user },

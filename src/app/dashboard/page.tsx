@@ -1,6 +1,6 @@
 import { Gallery } from "@/components/dashboard/Gallery";
 import Placeholder from "@/components/dashboard/Placeholder";
-import { SearchBar } from "@/components/dashboard/search-bar";
+import { SearchBar } from "@/components/search/search-bar";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { getUserSketches } from "@/server/queries/sketch";

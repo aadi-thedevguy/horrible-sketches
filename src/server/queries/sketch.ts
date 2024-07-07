@@ -43,14 +43,7 @@ export async function getSketchById(id: string) {
   }
   const data = await db.query.sketch.findFirst({
     where: (table, funcs) => funcs.eq(sketch.id, id),
-    columns: {
-      originalName: true,
-      canvasBg: true,
-      canvasPath: true,
-      filename: true,
-      updatedAt: true,
-      views: true,
-    },
+    columns: { authorId: false, filename: false, id: false },
     with: {
       author: true,
     },

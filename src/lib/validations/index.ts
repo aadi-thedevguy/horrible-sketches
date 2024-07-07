@@ -7,37 +7,37 @@ export const validateFile = z.object({
     .string()
     .min(1, { message: "Sketch is required" })
     .startsWith("data:image/png;base64,"),
-  canvasBg: z
-    .string()
-    .includes("#")
-    .min(4, { message: "Enter a Valid Hex Color Value" })
-    .max(7, { message: "Enter a Valid Hex Color Value" }),
-  canvas: z.array(
-    z.object({
-      paths: z.array(
-        z.object({
-          x: z.number(),
-          y: z.number(),
-        })
-      ),
-      strokeWidth: z
-        .number()
-        .min(1)
-        .max(5)
-        .transform((val) => Number(val))
-        .default(5),
+  // canvasBg: z
+  //   .string()
+  //   .includes("#")
+  //   .min(4, { message: "Enter a Valid Hex Color Value" })
+  //   .max(7, { message: "Enter a Valid Hex Color Value" }),
+  // canvas: z.array(
+  //   z.object({
+  //     paths: z.array(
+  //       z.object({
+  //         x: z.number(),
+  //         y: z.number(),
+  //       })
+  //     ),
+  //     strokeWidth: z
+  //       .number()
+  //       .min(1)
+  //       .max(5)
+  //       .transform((val) => Number(val))
+  //       .default(5),
 
-      // strokeWidth: z
-      //   .string()
-      //   .regex(/^[0-5]+$/)
-      //   .max(1)
-      //   .default("5"),
-      strokeColor: z.string().default("#000000"),
-      drawMode: z.boolean(),
-      startTimestamp: z.number().optional(),
-      endTimestamp: z.number().optional(),
-    })
-  ),
+  //     // strokeWidth: z
+  //     //   .string()
+  //     //   .regex(/^[0-5]+$/)
+  //     //   .max(1)
+  //     //   .default("5"),
+  //     strokeColor: z.string().default("#000000"),
+  //     drawMode: z.boolean(),
+  //     startTimestamp: z.number().optional(),
+  //     endTimestamp: z.number().optional(),
+  //   })
+  // ),
   // edit: z.boolean().default(false),
   // id: z.string().min(10).optional(),
 });

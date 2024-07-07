@@ -3,16 +3,20 @@ import { getSketchById } from "@/server/queries/sketch";
 import SketchView from "@/components/SketchView";
 import Image from "next/image";
 import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 
 async function page({ params }: { params: { id: string } }) {
   const data = await getSketchById(params.id);
-  const forwardedFor = headers().get("x-forwarded-for");
+  if (!data) {
+    return notFound();
+  }
 
-  // if (forwardedFor) {
-  //   console.log(forwardedFor.split(",")[0]);
-  //   const ip = headers().get("x-real-ip") ?? FALLBACK_IP_ADDRESS;
-  //   console.log("ip", ip);
-  // }
+  const ip = headers().get("x-real-ip");
+  const forwardedFor = headers().get("x-forwarded-for");
+  if (forwardedFor) {
+    console.log(ip + forwardedFor.split(",")[0]);
+    // console.log("ip", ip);
+  }
 
   return (
     <section className="max-w-xl mx-auto">
@@ -24,10 +28,10 @@ async function page({ params }: { params: { id: string } }) {
         <h3 className="font-medium text-muted-foreground">
           Created on {data?.updatedAt.toLocaleDateString()}
         </h3>
-        <div className="flex gap-2 text-secondary">
+        {/* <div className="flex gap-2 text-secondary">
           <Eye />
-          {/* <h3 className="font-semibold ">{data?.views.length} views</h3> */}
-        </div>
+          <h3 className="font-semibold ">{data?.views.length} views</h3>
+        </div> */}
         <h3 className="font-semibold">
           Made by{" "}
           <span className="text-primary underline italic">

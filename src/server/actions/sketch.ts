@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { sketch } from "@/lib/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { genericMessages } from "@/constants";
 import { validateFile } from "@/lib/validations";
 import { createClient } from "@/lib/supabase/server";
@@ -27,7 +27,7 @@ export async function createSketch(sketchData: z.infer<typeof validateFile>) {
       message: parsed.error.message,
     };
   }
-  const { file, filename, originalName, canvas, canvasBg } = parsed.data;
+  const { file, filename, originalName } = parsed.data;
 
   // check if user is logged in or not
   const {
@@ -88,8 +88,6 @@ export async function createSketch(sketchData: z.infer<typeof validateFile>) {
         url: secure_url,
         authorId: user?.id,
         filename: filename,
-        canvasPath: canvas,
-        canvasBg: canvasBg,
         originalName: originalName,
       })
       .returning();
@@ -153,3 +151,25 @@ export async function deleteSketch(id: string) {
     .delete(sketch)
     .where(and(eq(sketch.id, id), eq(sketch.authorId, user?.id)));
 }
+
+// export async function increaseViews(id: string, ipAddress: string) {
+//   // check if the ip is already in the views array
+//   const result = await db.query.sketch.findFirst({
+//     where: (table, funcs) => funcs.eq(sketch.id, id),
+//   });
+
+//   if (!result) throw new Error(genericMessages.SKETCH_NOT_FOUND);
+
+//   const views = result.views.filter((view) => view !== ipAddress);
+
+//   // update the views array with unique ip addresses
+//   // and return the count of views array after update
+//   const updatedViewCount = await db
+//     .update(sketch)
+//     .set({
+//       views: sql`${views} + ${[ipAddress]}`,
+//     })
+//     .where(eq(sketch.id, id))
+//     .returning();
+//   return updatedViewCount[0].views.length;
+// }

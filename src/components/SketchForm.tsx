@@ -48,12 +48,13 @@ import { cn } from "@/lib/utils";
 import { toast } from "./ui/use-toast";
 import { createSketch } from "@/server/actions/sketch";
 import { User } from "@supabase/supabase-js";
+import { useQueryClient } from "@tanstack/react-query";
 
 function SketchForm({ user }: { user: User }) {
-  const router = useRouter();
   const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
   const [sharableLink, setSharableLink] = React.useState("");
   const [isCopied, setIsCopied] = React.useState(false);
+  const client = useQueryClient();
 
   function copyText(link: string) {
     if (typeof window !== "undefined" && window.navigator.clipboard) {
@@ -97,17 +98,9 @@ function SketchForm({ user }: { user: User }) {
   const onSubmit = async (values: z.infer<typeof sketchformSchema>) => {
     const filename = values.name.replace(/\s/g, "-").toLowerCase();
     const file = await canvasRef.current?.exportImage("png");
-    const canvas = (await canvasRef.current?.exportPaths()) || [];
-    const sanitised = [...canvas];
-    for (let i = 0; i < canvas.length; i++) {
-      // @ts-ignore
-      sanitised[i].strokeWidth = Number(canvas[i].strokeWidth);
-    }
     const sketchData = {
       originalName: values.name,
-      canvas: sanitised,
       filename,
-      canvasBg: bg,
       file: file || "",
     };
 
@@ -123,6 +116,9 @@ function SketchForm({ user }: { user: User }) {
       localStorage.removeItem(user.email || "");
       form.reset();
       canvasRef.current?.resetCanvas();
+      await client.invalidateQueries({
+        queryKey: ["sketches"],
+      });
 
       if (link) {
         setSharableLink(link);

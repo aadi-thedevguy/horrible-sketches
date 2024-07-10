@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { sketch } from "@/lib/db/schema";
 import { createClient } from "@/lib/supabase/server";
 import { searchSchema } from "@/lib/validations";
-import { desc } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export async function getUserSketches({
@@ -37,11 +37,11 @@ export async function getUserSketches({
   return data;
 }
 
-export async function getSketchById(id: string) {
+export async function getSketchById(id: string, ipAddress: string) {
   if (!id) {
     throw new Error(genericMessages.SKETCH_NOT_FOUND);
   }
-  const data = await db.query.sketch.findFirst({
+  const result = await db.query.sketch.findFirst({
     where: (table, funcs) => funcs.eq(sketch.id, id),
     columns: { authorId: false, filename: false, id: false },
     with: {
@@ -49,7 +49,32 @@ export async function getSketchById(id: string) {
     },
   });
 
-  return data;
+  if (!result) throw new Error(genericMessages.SKETCH_NOT_FOUND);
+
+  // check if the ip is already in the ipaddresses array do nothing, else add the ip to the ipaddresses array
+  const alreadyViewed = result.ipAddresses?.find((view) => view === ipAddress);
+  if (alreadyViewed)
+    return {
+      data: result,
+      views: result.ipAddresses?.length || 0,
+    };
+  const updated = result.ipAddresses
+    ? [...result.ipAddresses, ipAddress]
+    : [ipAddress];
+
+  // update the ipaddresses array with unique ip addresses
+  // and return the count of ipaddresses array after update
+  const updatedViewCount = await db
+    .update(sketch)
+    .set({
+      ipAddresses: updated,
+    })
+    .where(eq(sketch.id, id))
+    .returning();
+  return {
+    data: result,
+    views: updatedViewCount[0].ipAddresses?.length || 0,
+  };
 }
 
 export async function searchSketches(obj: z.infer<typeof searchSchema>) {

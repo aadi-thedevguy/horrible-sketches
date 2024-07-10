@@ -18,6 +18,8 @@ export const genericMessages = {
     "Sorry, We are unable to Delete your Sketch, Try Again Later !",
   NO_USER_FOUND: "You must be logged in to perform this action",
   SKETCH_NOT_FOUND: "Sketch not found",
+  RATELIMIT_EXCEEDED:
+    "You have exceeded the number of requests, Try again after sometime",
 };
 
 export const constants = {

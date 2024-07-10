@@ -6,18 +6,23 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 async function page({ params }: { params: { id: string } }) {
-  const data = await getSketchById(params.id);
+  const FALLBACK_IP_ADDRESS = "0.0.0.0";
+
+  const getIpAddress = () => {
+    const ip = headers().get("x-real-ip");
+    const forwardedFor = headers().get("x-forwarded-for");
+    if (forwardedFor) {
+      return forwardedFor.split(",")[0] ?? FALLBACK_IP_ADDRESS;
+    }
+
+    return ip ?? FALLBACK_IP_ADDRESS;
+  };
+
+  const ip = getIpAddress();
+  const { data, views } = await getSketchById(params.id, ip);
   if (!data) {
     return notFound();
   }
-
-  const ip = headers().get("x-real-ip");
-  const forwardedFor = headers().get("x-forwarded-for");
-  if (forwardedFor) {
-    console.log(ip + forwardedFor.split(",")[0]);
-    // console.log("ip", ip);
-  }
-
   return (
     <section className="max-w-xl mx-auto">
       <h1 className="hidden md:flex gap-2 items-center justify-center mb-8 text-3xl font-semibold ">
@@ -28,10 +33,10 @@ async function page({ params }: { params: { id: string } }) {
         <h3 className="font-medium text-muted-foreground">
           Created on {data?.updatedAt.toLocaleDateString()}
         </h3>
-        {/* <div className="flex gap-2 text-secondary">
+        <div className="flex gap-2 text-secondary">
           <Eye />
-          <h3 className="font-semibold ">{data?.views.length} views</h3>
-        </div> */}
+          <h3 className="font-semibold ">{views} views</h3>
+        </div>
         <h3 className="font-semibold">
           Made by{" "}
           <span className="text-primary underline italic">

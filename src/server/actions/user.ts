@@ -6,6 +6,7 @@ import { profile } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { genericMessages } from "@/constants";
 import { signinSchema, signupSchema } from "@/lib/validations";
+import { ratelimit } from "@/lib/redis";
 
 export async function signUp(formData: FormData) {
   // validate the form data
@@ -68,6 +69,9 @@ export async function signIn(formData: FormData) {
     };
   }
   const { email } = parsed.data;
+
+  // allow 3 logins every 5 minutes
+  await ratelimit(email, 3, 60);
 
   try {
     // first check if the username exists or not

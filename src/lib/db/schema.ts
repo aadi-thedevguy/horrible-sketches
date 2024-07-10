@@ -1,13 +1,5 @@
-import { InferSelectModel, relations } from "drizzle-orm";
-import {
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-  index,
-  integer,
-  json,
-} from "drizzle-orm/pg-core";
+import { InferSelectModel, relations, sql } from "drizzle-orm";
+import { pgTable, text, timestamp, uuid, index } from "drizzle-orm/pg-core";
 
 export const profile = pgTable(
   "profiles",
@@ -36,18 +28,20 @@ export const sketch = pgTable(
     authorId: uuid("author_id")
       .notNull()
       .references(() => profile.id),
-    views: integer("views").notNull().default(0),
-    canvasBg: text("canvas_bg").default("#ffffff"),
-    canvasPath: json("canvas_path::json[]").default([
-      {
-        paths: [{ x: 0, y: 0 }],
-        strokeWidth: 5,
-        strokeColor: "#000000",
-        drawMode: false,
-      },
-    ]),
+    ipAddresses: text("ip_addresses").array(),
+    // .default(sql`'{}'::text[]`),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    // views: integer("views").notNull().default(0),
+    // canvasBg: text("canvas_bg").default("#ffffff"),
+    // canvasPath: json("canvas_path::json[]").default([
+    //   {
+    //     paths: [{ x: 0, y: 0 }],
+    //     strokeWidth: 5,
+    //     strokeColor: "#000000",
+    //     drawMode: false,
+    //   },
+    // ]),
   },
   (table) => {
     return {

@@ -2,12 +2,13 @@
 
 import { db } from "@/lib/db";
 import { sketch } from "@/lib/db/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { genericMessages } from "@/constants";
 import { validateFile } from "@/lib/validations";
 import { createClient } from "@/lib/supabase/server";
 import { v2 as cloudinary } from "cloudinary";
 import { z } from "zod";
+import { ratelimit } from "@/lib/redis";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -53,6 +54,9 @@ export async function createSketch(sketchData: z.infer<typeof validateFile>) {
   //   columns : [sketch.filename, sketch.id],
   //   where : eq(sketch.filename, filename)
   // })
+
+  // ratelimit the request
+  await ratelimit(user?.id);
 
   const result = await db.query.sketch.findFirst({
     columns: { id: true, filename: true },
@@ -133,6 +137,9 @@ export async function deleteSketch(id: string) {
     throw new Error(genericMessages.NO_USER_FOUND);
   }
 
+  // ratelimit the request
+  await ratelimit(user?.id);
+
   // check if user has permission to delete the sketch
   const result = await db.query.sketch.findFirst({
     where: (table, funcs) => funcs.eq(sketch.id, id),
@@ -151,25 +158,3 @@ export async function deleteSketch(id: string) {
     .delete(sketch)
     .where(and(eq(sketch.id, id), eq(sketch.authorId, user?.id)));
 }
-
-// export async function increaseViews(id: string, ipAddress: string) {
-//   // check if the ip is already in the views array
-//   const result = await db.query.sketch.findFirst({
-//     where: (table, funcs) => funcs.eq(sketch.id, id),
-//   });
-
-//   if (!result) throw new Error(genericMessages.SKETCH_NOT_FOUND);
-
-//   const views = result.views.filter((view) => view !== ipAddress);
-
-//   // update the views array with unique ip addresses
-//   // and return the count of views array after update
-//   const updatedViewCount = await db
-//     .update(sketch)
-//     .set({
-//       views: sql`${views} + ${[ipAddress]}`,
-//     })
-//     .where(eq(sketch.id, id))
-//     .returning();
-//   return updatedViewCount[0].views.length;
-// }

@@ -31,8 +31,8 @@ export async function signUp(prevState: FormState,
 
   try {
     // allow 3 logins every 5 minutes
-    // await ratelimit(email, 3, 60 * 5);
-    await ratelimit(email, 1, 30);
+    await ratelimit(email, 3, 60 * 5);
+    // await ratelimit(email, 1, 30);
   } catch (error) {
     if (error instanceof Error) {
       return {

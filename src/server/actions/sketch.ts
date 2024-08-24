@@ -4,10 +4,9 @@ import { db } from "@/lib/db";
 import { sketch } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { genericMessages } from "@/constants";
-import { validateFile } from "@/lib/validations";
+import { FileType, validateFile } from "@/lib/validations";
 import { createClient } from "@/lib/supabase/server";
 import { v2 as cloudinary } from "cloudinary";
-import { z } from "zod";
 import { ratelimit } from "@/lib/redis";
 
 cloudinary.config({
@@ -18,7 +17,7 @@ cloudinary.config({
 const supabase = createClient();
 const bucket = process.env.CLOUDINARY_BUCKET;
 
-export async function createSketch(sketchData: z.infer<typeof validateFile>) {
+export async function createSketch(sketchData: FileType) {
   // validate the form data
   const parsed = validateFile.safeParse(sketchData);
 

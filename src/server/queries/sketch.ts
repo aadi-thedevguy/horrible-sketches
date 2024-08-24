@@ -4,9 +4,8 @@ import { constants, genericMessages } from "@/constants";
 import { db } from "@/lib/db";
 import { sketch } from "@/lib/db/schema";
 import { createClient } from "@/lib/supabase/server";
-import { searchSchema } from "@/lib/validations";
-import { desc, eq, sql } from "drizzle-orm";
-import { z } from "zod";
+import { searchSchema, SearchType } from "@/lib/validations";
+import { desc, eq } from "drizzle-orm";
 
 export async function getUserSketches({
   authorId,
@@ -77,7 +76,7 @@ export async function getSketchById(id: string, ipAddress: string) {
   };
 }
 
-export async function searchSketches(obj: z.infer<typeof searchSchema>) {
+export async function searchSketches(obj: SearchType) {
   const parsed = searchSchema.safeParse(obj);
 
   if (!parsed.success) {

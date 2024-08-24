@@ -6,7 +6,7 @@ import {
 } from "react-sketch-canvas";
 import Image from "next/image";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { useRouter, useSearchParams } from "next/navigation";
+// import { useRouter, useSearchParams } from "next/navigation";
 import {
   Undo2Icon,
   Redo2Icon,
@@ -41,8 +41,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { constants } from "@/constants";
-import { sketchformSchema } from "@/lib/validations";
-import { z } from "zod";
+import { sketchformSchema, SketchType } from "@/lib/validations";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { toast } from "./ui/use-toast";
@@ -95,7 +94,7 @@ function SketchForm({ user }: { user: User }) {
     }
   }, [user.email]);
 
-  const onSubmit = async (values: z.infer<typeof sketchformSchema>) => {
+  const onSubmit = async (values: SketchType) => {
     const filename = values.name.replace(/\s/g, "-").toLowerCase();
     const file = await canvasRef.current?.exportImage("png");
     const sketchData = {

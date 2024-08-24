@@ -76,3 +76,9 @@ export const signupSchema = z.object({
 export const signinSchema = z.object({
   email: z.string().trim().email().max(50),
 });
+
+export type FileType = z.infer<typeof validateFile>;
+export type SignUpType = z.infer<typeof signupSchema>;
+export type SignInType = z.infer<typeof signinSchema>;
+export type SketchType = z.infer<typeof sketchformSchema>;
+export type SearchType = z.infer<typeof searchSchema>;

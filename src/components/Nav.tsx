@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import AvatarMenu from "./AvatarMenu";
 
 const Navbar = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data } = await supabase.auth.getUser();
 

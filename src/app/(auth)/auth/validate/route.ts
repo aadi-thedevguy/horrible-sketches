@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/verification-failed`);
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     error,
     data: { user },

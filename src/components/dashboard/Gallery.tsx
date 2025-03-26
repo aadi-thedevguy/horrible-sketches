@@ -50,7 +50,7 @@ export function Gallery({
     if (inView && hasNextPage) {
       fetchNextPage();
     }
-  }, [inView]);
+  }, [inView, hasNextPage, fetchNextPage]);
 
   return (
     <>

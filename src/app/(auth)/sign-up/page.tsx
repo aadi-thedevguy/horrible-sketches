@@ -16,7 +16,7 @@ import {
 import Image from "next/image";
 
 const page = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
 
   if (!error && data.user) {

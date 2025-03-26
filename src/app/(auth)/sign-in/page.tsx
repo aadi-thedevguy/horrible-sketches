@@ -17,7 +17,7 @@ import { redirect } from "next/navigation";
 import { FC } from "react";
 
 const page: FC = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
 
   if (!error && data.user) {

@@ -11,18 +11,18 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     [key: string]: string | string[] | undefined;
-  };
+  }>;
 };
 
 export default async function page({ searchParams }: Props) {
-  const { query } = searchParams;
+  const { query } = await searchParams;
 
   if (!query || typeof query !== "string") {
     return notFound();
   }
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) {
     redirect("/sign-in");

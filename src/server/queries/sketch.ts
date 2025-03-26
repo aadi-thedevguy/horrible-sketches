@@ -16,7 +16,7 @@ export async function getUserSketches({
   page?: number;
   limit?: number;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: user, error } = await supabase.auth.getUser();
   if (error || !user) {
@@ -84,7 +84,7 @@ export async function searchSketches(obj: SearchType) {
   }
   const { query, page } = parsed.data;
   // const limit = constants.RESULTS_PER_PAGE;
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

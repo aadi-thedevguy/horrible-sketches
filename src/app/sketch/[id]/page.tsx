@@ -2,15 +2,16 @@ import { Eye, Paintbrush, TabletSmartphone } from "lucide-react";
 import { getSketchById } from "@/server/queries/sketch";
 import SketchView from "@/components/SketchView";
 import Image from "next/image";
-import { headers } from "next/headers";
+import { headers as getHeaders } from "next/headers";
 import { notFound } from "next/navigation";
 
-async function page({ params }: { params: { id: string } }) {
+async function page({ params }: { params: Promise<{ id: string }> }) {
   const FALLBACK_IP_ADDRESS = "0.0.0.0";
 
-  const getIpAddress = () => {
-    const ip = headers().get("x-real-ip");
-    const forwardedFor = headers().get("x-forwarded-for");
+  const getIpAddress = async () => {
+    const headers = await getHeaders();
+    const ip = headers.get("x-real-ip");
+    const forwardedFor = headers.get("x-forwarded-for");
     if (forwardedFor) {
       return forwardedFor.split(",")[0] ?? FALLBACK_IP_ADDRESS;
     }
@@ -18,8 +19,9 @@ async function page({ params }: { params: { id: string } }) {
     return ip ?? FALLBACK_IP_ADDRESS;
   };
 
-  const ip = getIpAddress();
-  const { data, views } = await getSketchById(params.id, ip);
+  const ip = await getIpAddress();
+  const { id } = await params
+  const { data, views } = await getSketchById(id, ip);
   if (!data) {
     return notFound();
   }

@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(redirectTo);
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     error: verifyError,
     data: { user },
